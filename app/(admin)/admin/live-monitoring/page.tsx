@@ -7,8 +7,10 @@ import {
     Search,
     Plus,
     Pause,
-    CheckCircle2
+    CheckCircle2,
+    X
 } from "lucide-react";
+import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 
 const stats = [
@@ -80,15 +82,30 @@ const rooms: Room[] = [
 ];
 
 export default function LiveMonitoringPage() {
+    const [isCreateGroupModalOpen, setIsCreateGroupModalOpen] = useState(false);
+    const [groupName, setGroupName] = useState("");
+    const [isChildrenFavour, setIsChildrenFavour] = useState(false);
+
+    const handleCreateGroup = () => {
+        // Logic to create group would go here
+        console.log("Creating group:", { groupName, isChildrenFavour });
+        setIsCreateGroupModalOpen(false);
+        setGroupName("");
+        setIsChildrenFavour(false);
+    };
+
     return (
         <div className="space-y-8 max-w-8xl mx-auto">
             {/* Header */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-2xl sm:text-3xl font-bold text-brand-secondary">Admin Dashboard</h1>
-                    <p className="text-brand-success mt-1 text-sm sm:text-base">Welcome back! Here's what's happening with your platform.</p>
+                    <p className="text-brand-success mt-1 text-sm tracking-wider">Welcome back! Here's what's happening with your platform.</p>
                 </div>
-                <button className="w-full sm:w-auto bg-brand-secondary text-black px-4 py-2.5 rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-brand-secondary/90 transition-colors text-sm sm:text-base">
+                <button
+                    onClick={() => setIsCreateGroupModalOpen(true)}
+                    className="w-full sm:w-auto bg-brand-secondary cursor-pointer text-black px-4 py-2.5 rounded-lg font-bold flex items-center justify-center gap-2 hover:bg-brand-secondary/90 transition-colors text-sm sm:text-base"
+                >
                     <Plus className="w-4 h-4" />
                     Create New Group
                 </button>
@@ -97,12 +114,12 @@ export default function LiveMonitoringPage() {
             {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {stats.map((stat) => (
-                    <div key={stat.label} className="bg-bg-dark border border-zinc-700/50 rounded-2xl p-4 sm:p-6 flex items-center justify-between group hover:border-brand-secondary/30 transition-all duration-300">
+                    <div key={stat.label} className="bg-bg-dark border-border p-4 sm:p-6 flex items-center justify-between group transition-all duration-300">
                         <div>
                             <p className="text-zinc-500 text-[10px] sm:text-xs font-bold uppercase tracking-wider">{stat.label}</p>
                             <p className="text-white text-2xl sm:text-3xl font-bold mt-1 sm:mt-2 tracking-tight">{stat.value}</p>
                         </div>
-                        <div className={cn("w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110", stat.bgColor)}>
+                        <div className={cn("w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center transition-transform", stat.bgColor)}>
                             <stat.icon className={cn("w-5 h-5 sm:w-6 h-6", stat.color)} />
                         </div>
                     </div>
@@ -121,14 +138,14 @@ export default function LiveMonitoringPage() {
                     <input
                         type="text"
                         placeholder="Search by the Room name or game"
-                        className="w-full bg-bg-card border border-zinc-800 rounded-xl py-3 md:py-3.5 pl-12 pr-4 text-zinc-300 focus:outline-none focus:border-brand-secondary focus:ring-1 focus:ring-brand-secondary transition-all placeholder:text-zinc-600 text-sm sm:text-base italic"
+                        className="w-full bg-bg-card border-border py-3 md:py-3.5 pl-12 pr-4 text-zinc-300 focus:outline-none focus:border-brand-secondary focus:ring-1 focus:ring-brand-secondary transition-all placeholder:text-zinc-600 text-sm sm:text-base italic"
                     />
                 </div>
 
                 {/* Room Cards Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
                     {rooms.map((room) => (
-                        <div key={room.id} className="bg-bg-dark border border-zinc-700/50 rounded-2xl sm:rounded-3xl p-4 sm:p-6 space-y-4 sm:space-y-6 hover:border-brand-secondary/20 transition-colors">
+                        <div key={room.id} className="bg-bg-dark border-border rounded-2xl sm:rounded-3xl p-4 sm:p-6 space-y-4 sm:space-y-6 transition-colors">
                             <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-4">
                                 <div className="flex items-center gap-3">
                                     <div className="w-9 h-9 sm:w-10 sm:h-10 bg-brand-accent rounded-xl flex items-center justify-center shrink-0">
@@ -170,7 +187,7 @@ export default function LiveMonitoringPage() {
                                 <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider">Stations</p>
                                 <div className="grid grid-cols-1 sm:grid-cols-1 gap-2">
                                     {room.stations.map((station) => (
-                                        <div key={station.id} className="bg-bg-card border border-zinc-800 rounded-xl p-3 flex items-center justify-between hover:bg-grey-900 transition-colors">
+                                        <div key={station.id} className="bg-bg-card border border-zinc-800 rounded-xl p-3 flex items-center justify-between transition-colors">
                                             <div className="flex items-center gap-3">
                                                 <div className="bg-brand-success/20 p-1 rounded-md">
                                                     <CheckCircle2 className="w-4 h-4 text-brand-success" />
@@ -196,6 +213,66 @@ export default function LiveMonitoringPage() {
                     See All Rooms
                 </button>
             </div>
+            {/* Create Group Modal */}
+            {isCreateGroupModalOpen && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+                    <div
+                        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+                        onClick={() => setIsCreateGroupModalOpen(false)}
+                    />
+                    <div
+                        className="relative w-full max-w-xl border border-[#fff200] rounded-3xl p-6 md:p-8 animate-in zoom-in-95 duration-200"
+                        style={{ backgroundColor: '#111827', opacity: 1 }}
+                    >
+                        <div className="flex items-center gap-3 mb-8">
+                            <Plus className="text-brand-error w-6 h-6" />
+                            <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">Create New Group</h2>
+                        </div>
+
+                        <div className="space-y-6">
+                            <div className="space-y-2">
+                                <label className="block text-zinc-400 text-sm font-medium ml-1">
+                                    Group Name (Optional)
+                                </label>
+                                <input
+                                    type="text"
+                                    value={groupName}
+                                    onChange={(e) => setGroupName(e.target.value)}
+                                    placeholder="e.g., Team Phoenix"
+                                    className="w-full bg-[#1e293b] border border-[#fff200] rounded-xl p-4 text-brand-success placeholder:text-brand-success/40 focus:outline-none focus:ring-1 focus:ring-brand-secondary transition-all"
+                                />
+                            </div>
+
+                            <div className="flex items-start gap-3 group cursor-pointer" onClick={() => setIsChildrenFavour(!isChildrenFavour)}>
+                                <div className={cn(
+                                    "mt-1 w-5 h-5 rounded border border-[#fff200] flex items-center justify-center transition-colors",
+                                    isChildrenFavour ? "bg-brand-secondary" : "bg-transparent"
+                                )}>
+                                    {isChildrenFavour && <CheckCircle2 className="w-4 h-4 text-black" />}
+                                </div>
+                                <p className="text-brand-error text-sm leading-relaxed select-none">
+                                    If this is Children favour groups, then please put a check mark in the box.
+                                </p>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4 mt-8">
+                                <button
+                                    onClick={() => setIsCreateGroupModalOpen(false)}
+                                    className="py-4 px-6 bg-white text-black font-bold rounded-2xl cursor-pointer hover:bg-zinc-200 transition-colors"
+                                >
+                                    Back
+                                </button>
+                                <button
+                                    onClick={handleCreateGroup}
+                                    className="py-4 px-6 bg-brand-secondary text-black font-bold rounded-2xl cursor-pointer hover:bg-brand-secondary/90 transition-colors shadow-lg shadow-brand-secondary/20"
+                                >
+                                    Create Group
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -38,7 +38,7 @@ const menuItems = [
     {
         title: "Analytics",
         icon: BarChart2,
-        href: "/admin/analytis",
+        href: "/admin/analysis",
     },
     {
         title: "God Mode",

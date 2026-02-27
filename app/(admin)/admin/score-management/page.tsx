@@ -162,7 +162,7 @@ function ScoreDetailsModal({ score, onClose, onSave }: ScoreDetailsModalProps) {
 
                 <div className="flex-1 overflow-y-auto p-4 sm:p-8 space-y-6 scrollbar-hide">
                     {/* Game Header Card */}
-                    <div className="bg-[#2D0B2E] border-2 border-brand-secondary/30 rounded-2xl p-6 relative overflow-hidden group">
+                    <div className="bg-[#2D0B2E] border-border p-6 relative overflow-hidden group">
                         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 relative z-10">
                             <div className="flex items-center gap-4 text-center sm:text-left">
                                 <div className="w-12 h-12 bg-brand-accent rounded-xl flex items-center justify-center shadow-lg shadow-brand-accent/20">
@@ -202,7 +202,7 @@ function ScoreDetailsModal({ score, onClose, onSave }: ScoreDetailsModalProps) {
                     {/* Stations List */}
                     <div className="space-y-4">
                         {editableDetails.map((station, idx) => (
-                            <div key={idx} className="bg-bg-card border border-zinc-800 rounded-2xl p-4 sm:p-6 space-y-4 hover:border-brand-secondary/20 transition-all group/station">
+                            <div key={idx} className="bg-bg-card border-border p-4 sm:p-6 space-y-4">
                                 <div className="flex justify-between items-start">
                                     <div className="flex items-center gap-4">
                                         <div className="w-12 h-12 bg-brand-accent rounded-xl flex items-center justify-center group-hover/station:scale-110 transition-transform">
@@ -220,7 +220,7 @@ function ScoreDetailsModal({ score, onClose, onSave }: ScoreDetailsModalProps) {
                                                 type="number"
                                                 value={station.score}
                                                 onChange={(e) => handleScoreChange(idx, e.target.value)}
-                                                className="w-20 sm:w-24 bg-bg-deep border border-zinc-700 rounded-lg py-2 px-3 text-white text-xl sm:text-2xl font-black text-center focus:outline-none focus:border-brand-secondary transition-all"
+                                                className="w-20 sm:w-24 bg-bg-deep border-border py-2 px-3 text-white text-xl sm:text-2xl font-black text-center focus:outline-none focus:border-brand-secondary transition-all"
                                             />
                                         </div>
                                     </div>
@@ -228,7 +228,7 @@ function ScoreDetailsModal({ score, onClose, onSave }: ScoreDetailsModalProps) {
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     {station.players.map((player, pIdx) => (
-                                        <div key={pIdx} className="bg-bg-deep border border-zinc-800/50 rounded-xl p-3 flex items-center gap-3 group/player hover:border-brand-info/30 transition-colors">
+                                        <div key={pIdx} className="bg-bg-deep border-border p-3 flex items-center gap-3 group/player">
                                             <div className={cn(
                                                 "w-8 h-8 rounded-lg flex items-center justify-center",
                                                 pIdx % 2 === 0 ? "bg-brand-accent/20" : "bg-brand-info/20"
@@ -276,7 +276,7 @@ export default function ScoreManagementPage() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-2xl sm:text-3xl font-bold text-brand-secondary">Score Management</h1>
-                    <p className="text-brand-success mt-1 font-bold text-sm sm:text-base uppercase tracking-wider">Edit scores and view change history</p>
+                    <p className="text-brand-success mt-1 text-sm tracking-wider">Edit scores and view change history</p>
                 </div>
                 <button
                     onClick={() => setShowHistory(!showHistory)}
@@ -290,12 +290,12 @@ export default function ScoreManagementPage() {
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {stats.map((stat, index) => (
-                    <div key={index} className={cn("bg-bg-card border p-4 sm:p-6 rounded-xl flex items-center justify-between group cursor-default transition-all duration-300", stat.borderColor)}>
+                    <div key={index} className="bg-bg-card border-border p-4 sm:p-6 rounded-xl flex items-center justify-between group cursor-default transition-all duration-300">
                         <div>
                             <p className="text-zinc-500 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1">{stat.label}</p>
                             <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">{stat.value}</h2>
                         </div>
-                        <div className={cn("p-2.5 sm:p-3 rounded-lg flex items-center justify-center transition-transform group-hover:scale-110", stat.iconBg)}>
+                        <div className="p-2.5 sm:p-3 rounded-lg flex items-center justify-center transition-transform">
                             <stat.icon className={cn("w-5 h-5 sm:w-6 h-6", stat.iconColor)} />
                         </div>
                     </div>
@@ -306,9 +306,9 @@ export default function ScoreManagementPage() {
             {showHistory && (
                 <div className="space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
                     <h2 className="text-xl sm:text-2xl font-bold text-white">Change History</h2>
-                    <div className="bg-bg-dark border border-zinc-800 rounded-2xl overflow-hidden p-4 sm:p-6 space-y-4">
+                    <div className="bg-bg-dark border-border overflow-hidden p-4 sm:p-6 space-y-4">
                         {historyData.map((item, index) => (
-                            <div key={index} className="bg-bg-deep border border-zinc-800 rounded-xl p-4 sm:p-5 relative group hover:border-brand-secondary/20 transition-colors">
+                            <div key={index} className="bg-bg-deep border-border rounded-xl p-4 sm:p-5 relative group transition-colors">
                                 <div className="flex flex-col sm:flex-row justify-between gap-4">
                                     <div className="space-y-2">
                                         <div className="flex flex-wrap items-center gap-2">
@@ -350,7 +350,7 @@ export default function ScoreManagementPage() {
                         <div
                             key={index}
                             onClick={() => setSelectedScore(row)}
-                            className="bg-bg-card cursor-pointer border border-zinc-800 rounded-xl p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group hover:border-brand-secondary/30 transition-all duration-300"
+                            className="bg-bg-card cursor-pointer border-border p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group transition-all duration-300"
                         >
                             <div className="space-y-2 w-full sm:w-auto">
                                 <div className="flex items-center gap-3">

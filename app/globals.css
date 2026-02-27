@@ -63,3 +63,13 @@ body {
   display: none;
   /* Chrome, Safari, Opera */
 }
+
+.border-border{
+  border-radius: 14px;
+  border: 1px solid var(--Secondary-Button, #FFE501);
+}
+
+.border-border-2{
+  border-radius: 14px;
+  border: 1px solid var(--Secondary-Text, #3AFEB2);
+}

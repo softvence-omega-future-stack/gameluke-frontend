@@ -21,7 +21,7 @@ export default function AdminLayout({
                 <Navbar onMenuClick={() => setIsSidebarOpen(true)} />
 
                 {/* Scrollable Content */}
-                <main className="flex-1 overflow-y-auto bg-background p-4 sm:p-8">
+                <main className="flex-1 overflow-y-auto bg-background p-4 sm:p-10">
                     <div className="max-w-8xl mx-auto w-full">
                         {children}
                     </div>
