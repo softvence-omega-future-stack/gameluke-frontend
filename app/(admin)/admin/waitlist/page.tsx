@@ -10,7 +10,6 @@ import {
     Trash2,
     Play,
     Info,
-    Monitor
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -97,7 +96,7 @@ export default function WaitlistPage() {
             {/* Header section */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-brand-secondary text-nowrap">Waitlist Management</h1>
+                    <h1 className="text-xl sm:text-2xl font-bold text-brand-secondary text-nowrap">Waitlist Management</h1>
                     <p className="text-brand-success mt-1 text-sm tracking-wider">Manage group queue and priority settings</p>
                 </div>
                 {/* <button className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-brand-secondary text-black rounded-lg font-bold hover:bg-brand-secondary/90 transition-colors text-sm sm:text-base text-nowrap">
@@ -112,10 +111,10 @@ export default function WaitlistPage() {
                     <div key={index} className="bg-bg-card border-border p-4 sm:p-6 flex items-center justify-between group transition-all duration-300">
                         <div>
                             <p className="text-zinc-500 text-[10px] sm:text-xs font-bold uppercase tracking-wider mb-1">{item.label}</p>
-                            <h2 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">{item.value}</h2>
+                            <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">{item.value}</h2>
                         </div>
                         <div className={cn("p-2.5 sm:p-3 rounded-lg transition-transform", item.iconBg)}>
-                            <item.Icon className={cn("w-5 h-5 sm:w-6 h-6", item.iconColor)} />
+                            <item.Icon className={cn("w-5 h-5 sm:w-6 sm:h-6", item.iconColor)} />
                         </div>
                     </div>
                 ))}
@@ -123,13 +122,13 @@ export default function WaitlistPage() {
 
             {/* Queue Section */}
             <div className="space-y-6">
-                <h3 className="text-2xl font-bold text-white">Current Queue</h3>
+                <h3 className="text-lg font-bold text-white">Current Queue</h3>
 
                 <div className="space-y-4">
                     {queueData.map((group) => (
                         <div key={group.id} className="bg-bg-card border-border p-3 sm:p-4 sm:rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4 group transition-all">
                             <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 w-full md:w-auto">
-                                <div className="flex flex-col items-center justify-center min-w-[56px] sm:min-w-[64px]">
+                                <div className="flex flex-col items-center justify-center min-w-14 sm:min-w-16">
                                     <div className="w-10 h-10 sm:w-12 sm:h-12 bg-brand-accent rounded-lg flex items-center justify-center text-white text-lg sm:text-xl font-bold mb-1">
                                         {group.position}
                                     </div>
@@ -138,7 +137,7 @@ export default function WaitlistPage() {
 
                                 <div className="flex flex-col items-center sm:items-start text-center sm:text-left min-w-0 flex-1">
                                     <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 sm:gap-3 mb-2">
-                                        <h4 className="text-lg sm:text-xl font-bold text-white truncate max-w-[200px] sm:max-w-none">{group.name}</h4>
+                                        <h4 className="text-base sm:text-lg font-bold text-white truncate max-w-50 sm:max-w-none">{group.name}</h4>
                                         {group.isNext && (
                                             <span className="bg-brand-warning/20 text-brand-warning px-2 py-0.5 rounded text-[10px] sm:text-xs font-bold uppercase tracking-wider whitespace-nowrap">Next</span>
                                         )}
@@ -146,11 +145,11 @@ export default function WaitlistPage() {
 
                                     <div className="flex flex-wrap justify-center sm:justify-start items-center gap-x-4 gap-y-2 text-zinc-400 text-xs sm:text-sm">
                                         <div className="flex items-center gap-1.5">
-                                            <Users className="w-3.5 h-3.5 sm:w-4 h-4 text-zinc-500" />
+                                            <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zinc-500" />
                                             <span>{group.players} players</span>
                                         </div>
                                         <div className="flex items-center gap-1.5">
-                                            <Timer className="w-3.5 h-3.5 sm:w-4 h-4 text-zinc-500" />
+                                            <Timer className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-zinc-500" />
                                             <span>{group.waitTime}</span>
                                         </div>
                                         <div className="flex items-center gap-1.5">
@@ -163,12 +162,12 @@ export default function WaitlistPage() {
                             </div>
 
                             <div className="flex items-center gap-3 w-full md:w-auto mt-2 md:mt-0">
-                                <button className="flex-1 md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-2 bg-brand-secondary text-black rounded-lg font-bold hover:bg-brand-secondary/90 transition-colors whitespace-nowrap text-sm sm:text-base">
-                                    <Play className="w-3.5 h-3.5 sm:w-4 h-4 fill-black" />
+                                <button className="flex-1 cursor-pointer md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-2 bg-brand-secondary text-black rounded-lg font-bold hover:bg-brand-secondary/90 transition-colors whitespace-nowrap text-sm sm:text-base">
+                                    <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-black" />
                                     Assign Room
                                 </button>
-                                <button className="p-2.5 sm:p-2 text-zinc-500 border border-zinc-800 rounded-lg hover:bg-brand-error/20 hover:text-brand-error hover:border-brand-error/50 transition-all shrink-0">
-                                    <Trash2 className="w-4 h-4 sm:w-5 h-5" />
+                                <button className="p-2.5 cursor-pointer sm:p-2 text-zinc-500 border border-zinc-800 rounded-lg hover:bg-brand-error/20 hover:text-brand-error hover:border-brand-error/50 transition-all shrink-0">
+                                    <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
                                 </button>
                             </div>
                         </div>
@@ -183,7 +182,7 @@ export default function WaitlistPage() {
                 </div>
                 <div>
                     <h5 className="text-brand-info text-sm sm:text-base font-bold uppercase tracking-wider">Auto-Promotion Active</h5>
-                    <p className="text-zinc-400 text-sm sm:text-base mt-0.5">
+                    <p className="text-zinc-400 text-xs sm:text-sm mt-0.5">
                         Groups will be automatically assigned to rooms as they become available, following the First In First Out priority order.
                     </p>
                 </div>

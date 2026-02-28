@@ -7,11 +7,13 @@ import {
     Search,
     Plus,
     Pause,
+    Play,
     CheckCircle2,
     X
 } from "lucide-react";
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 const stats = [
     {
@@ -85,6 +87,16 @@ export default function LiveMonitoringPage() {
     const [isCreateGroupModalOpen, setIsCreateGroupModalOpen] = useState(false);
     const [groupName, setGroupName] = useState("");
     const [isChildrenFavour, setIsChildrenFavour] = useState(false);
+    const [pausedRooms, setPausedRooms] = useState<Set<string>>(new Set());
+
+    const togglePause = (roomId: string) => {
+        setPausedRooms(prev => {
+            const next = new Set(prev);
+            if (next.has(roomId)) next.delete(roomId);
+            else next.add(roomId);
+            return next;
+        });
+    };
 
     const handleCreateGroup = () => {
         // Logic to create group would go here
@@ -99,7 +111,7 @@ export default function LiveMonitoringPage() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-brand-secondary">Admin Dashboard</h1>
+                    <h1 className="text-xl sm:text-2xl font-bold text-brand-secondary">Admin Dashboard</h1>
                     <p className="text-brand-success mt-1 text-sm tracking-wider">Welcome back! Here's what's happening with your platform.</p>
                 </div>
                 <button
@@ -117,7 +129,7 @@ export default function LiveMonitoringPage() {
                     <div key={stat.label} className="bg-bg-dark border-border p-4 sm:p-6 flex items-center justify-between group transition-all duration-300">
                         <div>
                             <p className="text-zinc-500 text-[10px] sm:text-xs font-bold uppercase tracking-wider">{stat.label}</p>
-                            <p className="text-white text-2xl sm:text-3xl font-bold mt-1 sm:mt-2 tracking-tight">{stat.value}</p>
+                            <p className="text-white text-xl sm:text-2xl font-bold mt-1 sm:mt-2 tracking-tight">{stat.value}</p>
                         </div>
                         <div className={cn("w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center transition-transform", stat.bgColor)}>
                             <stat.icon className={cn("w-5 h-5 sm:w-6 h-6", stat.color)} />
@@ -128,7 +140,7 @@ export default function LiveMonitoringPage() {
 
             {/* Live Room Status Section */}
             <div className="space-y-6">
-                <h2 className="text-xl sm:text-2xl font-bold text-white">Live Room Status</h2>
+                <h2 className="text-lg sm:text-xl font-bold text-white">Live Room Status</h2>
 
                 {/* Search Bar */}
                 <div className="relative group">
@@ -152,7 +164,7 @@ export default function LiveMonitoringPage() {
                                         <MapPin className="text-white w-4 h-4 sm:w-5 h-5" />
                                     </div>
                                     <div>
-                                        <h3 className="text-white text-lg sm:text-xl font-bold line-clamp-1">{room.name}</h3>
+                                        <h3 className="text-white text-base sm:text-lg font-bold line-clamp-1">{room.name}</h3>
                                         <span className={cn(
                                             "text-[10px] sm:text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-md flex items-center gap-1 w-fit mt-1",
                                             room.status === "Occupied" ? "bg-brand-success/20 text-brand-success" : "bg-brand-info/20 text-brand-info"
@@ -164,7 +176,7 @@ export default function LiveMonitoringPage() {
                                 </div>
                                 <div className="text-left xs:text-right">
                                     <p className="text-zinc-500 text-[10px] sm:text-xs font-bold uppercase tracking-wider">Time Left</p>
-                                    <p className="text-white text-xl sm:text-2xl font-bold">{room.timeLeft}</p>
+                                    <p className="text-white text-lg sm:text-xl font-bold">{room.timeLeft}</p>
                                 </div>
                             </div>
 
@@ -176,8 +188,15 @@ export default function LiveMonitoringPage() {
                                     <p className="text-zinc-600 text-xs sm:text-sm truncate">{room.details}</p>
                                 </div>
                                 {room.status === "Occupied" && (
-                                    <div className="bg-brand-secondary p-1.5 sm:p-2 rounded-md cursor-pointer hover:bg-brand-secondary/90 shrink-0">
-                                        <Pause className="w-3.5 h-3.5 sm:w-4 h-4 text-black" fill="black" />
+                                    <div
+                                        onClick={() => togglePause(room.id)}
+                                        className="bg-brand-secondary p-1.5 sm:p-2 rounded-md cursor-pointer hover:bg-brand-secondary/90 shrink-0 transition-colors"
+                                        title={pausedRooms.has(room.id) ? "Resume" : "Pause"}
+                                    >
+                                        {pausedRooms.has(room.id)
+                                            ? <Play className="w-3.5 h-3.5 sm:w-4 h-4 text-black" fill="black" />
+                                            : <Pause className="w-3.5 h-3.5 sm:w-4 h-4 text-black" fill="black" />
+                                        }
                                     </div>
                                 )}
                             </div>
@@ -201,7 +220,7 @@ export default function LiveMonitoringPage() {
                             </div>
 
                             {room.status === "Available" && (
-                                <button className="w-full bg-brand-secondary text-black py-2.5 sm:py-3 rounded-xl font-bold hover:bg-brand-secondary/90 transition-colors mt-2 text-sm sm:text-base">
+                                <button className="w-full cursor-pointer bg-brand-secondary text-black py-2.5 sm:py-3 rounded-xl font-bold hover:bg-brand-secondary/90 transition-colors mt-2 text-sm sm:text-base">
                                     Available for Assign Group
                                 </button>
                             )}
@@ -209,9 +228,12 @@ export default function LiveMonitoringPage() {
                     ))}
                 </div>
 
-                <button className="w-full py-3 sm:py-4 bg-white text-black font-bold text-base sm:text-lg rounded-xl sm:rounded-2xl hover:bg-zinc-200 transition-colors shadow-2xl shadow-white/5">
+                <Link
+                    href="/admin/live-monitoring/all-rooms"
+                    className="w-full cursor-pointer py-2.5 sm:py-3 bg-white text-black font-bold text-sm sm:text-base rounded-xl sm:rounded-2xl hover:bg-zinc-200 transition-colors shadow-2xl shadow-white/5 flex items-center justify-center"
+                >
                     See All Rooms
-                </button>
+                </Link>
             </div>
             {/* Create Group Modal */}
             {isCreateGroupModalOpen && (
@@ -226,7 +248,7 @@ export default function LiveMonitoringPage() {
                     >
                         <div className="flex items-center gap-3 mb-8">
                             <Plus className="text-brand-error w-6 h-6" />
-                            <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">Create New Group</h2>
+                            <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight">Create New Group</h2>
                         </div>
 
                         <div className="space-y-6">

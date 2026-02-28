@@ -11,6 +11,7 @@ import {
   Square,
   Wrench,
   X,
+  ArrowLeft,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -33,37 +34,24 @@ interface Room {
   allowManualOverride: boolean;
 }
 
-const initialRooms: Room[] = [
-  {
-    id: "room-1",
-    name: "Room 1",
-    isLocked: false,
-    allowManualOverride: true,
-    stations: [
-      { id: "1-a", name: "Station A", status: "Active" },
-      { id: "1-b", name: "Station B", status: "Active" },
-      { id: "1-c", name: "Station C", status: "Active" },
-    ],
-  },
-  {
-    id: "room-2",
-    name: "Room 2",
-    isLocked: false,
-    allowManualOverride: true,
-    stations: [
-      { id: "2-a", name: "Station A", status: "Active" },
-      {
-        id: "2-b",
-        name: "Station B",
-        status: "Defective",
-        warning: "Sensor malfunction",
-      },
-      { id: "2-c", name: "Station C", status: "Active" },
-    ],
-  },
-];
+const initialRooms: Room[] = Array.from({ length: 19 }, (_, i) => ({
+  id: `room-${i + 1}`,
+  name: `Room ${i + 1}`,
+  isLocked: false,
+  allowManualOverride: true,
+  stations: [
+    { id: `${i + 1}-a`, name: "Station A", status: "Active" },
+    {
+      id: `${i + 1}-b`,
+      name: "Station B",
+      status: i === 1 ? "Defective" : "Active",
+      warning: i === 1 ? "Sensor malfunction" : undefined,
+    },
+    { id: `${i + 1}-c`, name: "Station C", status: "Active" },
+  ],
+}));
 
-export default function RoomManagementPage() {
+export default function AllRoomManagementPage() {
   const [rooms, setRooms] = useState<Room[]>(initialRooms);
   const [searchQuery, setSearchQuery] = useState("");
   const [isDefectModalOpen, setIsDefectModalOpen] = useState(false);
@@ -143,16 +131,28 @@ export default function RoomManagementPage() {
     );
   };
 
+  const filteredRooms = rooms.filter((room) =>
+    room.name.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+
   return (
     <div className="space-y-6 max-w-8xl mx-auto">
       {/* Header */}
-      <div>
-        <h1 className="text-xl sm:text-2xl font-bold text-brand-secondary">
-          Room Management
-        </h1>
-        <p className="text-brand-success mt-1 text-sm tracking-wider">
-          Manage rooms, stations, and hardware status
-        </p>
+      <div className="flex items-center gap-4">
+        <Link
+          href="/admin/room-management"
+          className="p-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors shrink-0"
+        >
+          <ArrowLeft className="w-4 h-4" />
+        </Link>
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold text-brand-secondary">
+            All Rooms Management
+          </h1>
+          <p className="text-brand-success mt-1 text-sm tracking-wider">
+            Manage all {rooms.length} rooms and hardware status
+          </p>
+        </div>
       </div>
 
       {/* Search Bar */}
@@ -163,81 +163,81 @@ export default function RoomManagementPage() {
         <input
           type="text"
           placeholder="Search by the Room name or game"
-          className="w-full bg-bg-card border-border py-3 md:py-3.5 pl-12 pr-4 text-zinc-300 focus:outline-none focus:border-brand-secondary focus:ring-1 focus:ring-brand-secondary transition-all placeholder:text-zinc-600 text-sm sm:text-base"
+          className="w-full bg-bg-card border-border py-3 md:py-3.5 pl-12 pr-4 text-zinc-300 focus:outline-none focus:border-brand-secondary focus:ring-1 focus:ring-brand-secondary transition-all placeholder:text-zinc-600 text-sm sm:text-base rounded-xl"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {rooms.map((room) => (
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+        {filteredRooms.map((room) => (
           <div
             key={room.id}
-            className="bg-bg-card border-border p-6 md:p-8 flex flex-col h-full transition-all"
+            className="bg-bg-card border-border p-5 md:p-6 flex flex-col h-full transition-all rounded-2xl"
           >
             {/* Room Header */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 md:mb-8 gap-4">
-              <div className="flex items-center gap-3 md:gap-4">
-                <div className="p-2.5 md:p-3 bg-pink-500 rounded-xl shadow-lg shadow-pink-500/20">
-                  <Unlock className="w-5 h-5 md:w-6 md:h-6 text-white" />
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-pink-500 rounded-lg shadow-lg shadow-pink-500/20">
+                  <Unlock className="w-4 h-4 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-lg sm:text-xl font-bold text-white leading-tight">
+                  <h2 className="text-base font-bold text-white leading-tight">
                     {room.name}
                   </h2>
-                  <span className="text-[10px] sm:text-xs uppercase font-bold tracking-wider text-brand-success ">
+                  <span className="text-[10px] uppercase font-bold tracking-wider text-brand-success ">
                     {room.isLocked ? "Locked" : "Unlocked"}
                   </span>
                 </div>
               </div>
               <button
                 onClick={() => toggleRoomLock(room.id)}
-                className="w-full cursor-pointer sm:w-auto flex items-center justify-center gap-2 px-4 py-2 border border-brand-success/30 rounded-xl text-brand-success text-[10px] sm:text-xs font-bold hover:bg-brand-success/10 transition-colors uppercase tracking-wider"
+                className="w-full cursor-pointer sm:w-auto flex items-center justify-center gap-1.5 px-3 py-1.5 border border-brand-success/30 rounded-lg text-brand-success text-[10px] font-bold hover:bg-brand-success/10 transition-colors uppercase tracking-wider"
               >
-                <Lock className="w-3 md:w-3.5 h-3 md:h-3.5" />
-                {room.isLocked ? "Unlock Room" : "Lock Room"}
+                <Lock className="w-3 h-3" />
+                {room.isLocked ? "Unlock" : "Lock"}
               </button>
             </div>
 
             {/* Stations Section */}
-            <div className="flex-1 space-y-6">
-              <h3 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.15em] mb-4">
+            <div className="flex-1 space-y-4">
+              <h3 className="text-zinc-500 text-[10px] font-bold uppercase tracking-[0.15em] mb-2">
                 Stations
               </h3>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 {room.stations.map((station) => (
                   <div
                     key={station.id}
                     className={cn(
-                      "bg-[#1e293b]/40 border rounded-2xl p-4 transition-all duration-300",
+                      "bg-[#1e293b]/40 border rounded-xl p-3 transition-all duration-300",
                       station.status === "Defective"
                         ? "border-red-900/50"
                         : "border-zinc-800",
                     )}
                   >
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
                         <div
                           className={cn(
-                            "p-2 rounded-lg",
+                            "p-1.5 rounded-md",
                             station.status === "Defective"
                               ? "bg-brand-error/20"
                               : "bg-brand-success/20",
                           )}
                         >
                           {station.status === "Defective" ? (
-                            <AlertTriangle className="w-4 h-4 md:w-5 md:h-5 text-brand-error" />
+                            <AlertTriangle className="w-3.5 h-3.5 text-brand-error" />
                           ) : (
-                            <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-brand-success" />
+                            <CheckCircle2 className="w-3.5 h-3.5 text-brand-success" />
                           )}
                         </div>
                         <div>
-                          <h4 className="text-white font-bold text-sm sm:text-base">
+                          <h4 className="text-white font-bold text-xs">
                             {station.name}
                           </h4>
                           <span
                             className={cn(
-                              "text-[10px] sm:text-xs uppercase font-bold px-2 py-0.5 rounded tracking-wider",
+                              "text-[9px] uppercase font-bold px-1.5 py-0.5 rounded tracking-wider",
                               station.status === "Active"
                                 ? "bg-brand-success/40 text-brand-success"
                                 : station.status === "Defective"
@@ -251,22 +251,13 @@ export default function RoomManagementPage() {
                       </div>
                     </div>
 
-                    {station.warning && (
-                      <div className="bg-brand-error/20 border border-brand-error/30 rounded-lg p-3 mb-4 flex items-center gap-2">
-                        <AlertTriangle className="w-4 h-4 text-brand-error shrink-0" />
-                        <span className="text-brand-error text-[10px] sm:text-xs font-bold uppercase tracking-wider">
-                          {station.warning}
-                        </span>
-                      </div>
-                    )}
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                    <div className="grid grid-cols-3 gap-1.5">
                       <button
                         onClick={() =>
                           toggleStationStatus(room.id, station.id, "Active")
                         }
                         className={cn(
-                          "flex cursor-pointer items-center justify-center gap-1.5 py-2 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all",
+                          "flex cursor-pointer items-center justify-center gap-1 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all",
                           station.status === "Active"
                             ? "bg-brand-success/20 text-brand-success border border-brand-success/50 cursor-default"
                             : "text-zinc-500 border border-zinc-800 hover:bg-zinc-800",
@@ -274,18 +265,18 @@ export default function RoomManagementPage() {
                       >
                         <Play
                           className={cn(
-                            "w-3.5 h-3.5",
+                            "w-3 h-3",
                             station.status === "Active" && "fill-brand-success",
                           )}
                         />
-                        Activate
+                        Active
                       </button>
                       <button
                         onClick={() =>
                           toggleStationStatus(room.id, station.id, "Inactive")
                         }
                         className={cn(
-                          "flex cursor-pointer items-center justify-center gap-1.5 py-2 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all",
+                          "flex cursor-pointer items-center justify-center gap-1 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all",
                           station.status === "Inactive"
                             ? "bg-zinc-800 text-white border border-zinc-700"
                             : "text-zinc-500 border border-zinc-800 hover:bg-zinc-800",
@@ -293,23 +284,23 @@ export default function RoomManagementPage() {
                       >
                         <Square
                           className={cn(
-                            "w-3.5 h-3.5",
+                            "w-3 h-3",
                             station.status === "Inactive" && "fill-white",
                           )}
                         />
-                        Deactivate
+                        Off
                       </button>
                       <button
                         onClick={() => handleMarkDefectClick(room.id, station)}
                         className={cn(
-                          "sm:col-span-2 md:col-span-1 flex cursor-pointer items-center justify-center gap-1.5 py-2 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all text-nowrap",
+                          "flex cursor-pointer items-center justify-center gap-1 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition-all",
                           station.status === "Defective"
                             ? "bg-brand-error/20 text-brand-error border border-brand-error/50"
                             : "text-zinc-500 border border-zinc-800 hover:bg-brand-error/10 hover:text-brand-error hover:border-brand-error/30",
                         )}
                       >
-                        <Wrench className="w-3.5 h-3.5" />
-                        Mark Defect
+                        <Wrench className="w-3 h-3" />
+                        Defect
                       </button>
                     </div>
                   </div>
@@ -318,14 +309,14 @@ export default function RoomManagementPage() {
             </div>
 
             {/* Manual Override Toggle */}
-            <div className="mt-8 pt-6 border-t border-zinc-800 flex items-center justify-between">
-              <span className="text-zinc-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
-                Allow Manual Override
+            <div className="mt-6 pt-4 border-t border-zinc-800 flex items-center justify-between">
+              <span className="text-zinc-400 text-[10px] font-bold uppercase tracking-wider">
+                Manual Override
               </span>
               <button
                 onClick={() => toggleOverride(room.id)}
                 className={cn(
-                  "relative inline-flex h-5 w-10 md:h-6 md:w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                  "relative inline-flex h-4 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
                   room.allowManualOverride
                     ? "bg-brand-secondary"
                     : "bg-zinc-700",
@@ -333,7 +324,7 @@ export default function RoomManagementPage() {
               >
                 <span
                   className={cn(
-                    "pointer-events-none inline-block h-4 w-4 md:h-5 md:w-5 transform rounded-full bg-black shadow ring-0 transition duration-200 ease-in-out",
+                    "pointer-events-none inline-block h-3 w-3 transform rounded-full bg-black shadow ring-0 transition duration-200 ease-in-out",
                     room.allowManualOverride
                       ? "translate-x-5"
                       : "translate-x-0",
@@ -345,17 +336,9 @@ export default function RoomManagementPage() {
         ))}
       </div>
 
-      {/* See All Rooms Button */}
-      <Link
-        href="/admin/room-management/all-rooms"
-        className="w-full bg-white cursor-pointer text-black py-2.5 md:py-3 rounded-xl font-bold text-sm md:text-base hover:bg-zinc-200 transition-colors shadow-xl flex justify-center items-center"
-      >
-        See All Rooms
-      </Link>
-
       {/* Defect Modal */}
       {isDefectModalOpen && selectedStation && (
-        <div className="fixed inset-0 z-200 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
           <div
             className="absolute inset-0 bg-black/80 backdrop-blur-sm"
             onClick={() => setIsDefectModalOpen(false)}
@@ -378,8 +361,7 @@ export default function RoomManagementPage() {
 
             <p className="text-zinc-400 text-sm mb-8 leading-relaxed">
               Marking a station as defective will exclude it from future
-              assignments. The room will remain playable with remaining
-              stations.
+              assignments.
             </p>
 
             <div className="space-y-6">
@@ -401,7 +383,7 @@ export default function RoomManagementPage() {
                   value={defectNotes}
                   onChange={(e) => setDefectNotes(e.target.value)}
                   placeholder="Describe the issue..."
-                  className="w-full bg-[#1e293b] border-border rounded-xl p-4 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-brand-secondary transition-all min-h-30 resize-none"
+                  className="w-full bg-[#1e293b] border-border rounded-xl p-4 text-white placeholder:text-zinc-600 focus:outline-none focus:ring-1 focus:ring-brand-secondary transition-all min-h-[120px] resize-none"
                 />
               </div>
 

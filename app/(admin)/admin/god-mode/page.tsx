@@ -28,14 +28,14 @@ const SessionCard = ({ teamName, room, players, timeRemaining }: SessionCardProp
                     <Play className="text-[#ec2c8a] fill-[#ec2c8a]" size={20} />
                 </div>
                 <div>
-                    <h3 className="text-xl font-bold text-white transition-colors">{teamName}</h3>
+                    <h3 className="text-base font-bold text-white transition-colors">{teamName}</h3>
                     <p className="text-gray-400 text-sm">{room} • {players} players</p>
                 </div>
             </div>
 
             <div className="text-right flex flex-col items-end w-full md:w-auto">
                 <p className="text-gray-500 text-[10px] uppercase tracking-widest mb-1">Time Remaining</p>
-                <p className="text-3xl font-mono font-bold text-white">{timeRemaining}</p>
+                <p className="text-xl font-mono font-bold text-white">{timeRemaining}</p>
             </div>
         </div>
 
@@ -76,7 +76,7 @@ export default function GodModePage() {
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-brand-secondary">God Mode Controls</h1>
+                    <h1 className="text-xl sm:text-2xl font-bold text-brand-secondary">God Mode Controls</h1>
                     <p className="text-brand-success mt-1 text-sm tracking-wider">Advanced administrative overrides and system controls</p>
                 </div>
                 <div className="px-4 py-2 bg-[#fff2001a] border border-[#fff20033] rounded-lg flex items-center gap-2 text-[#fff200] text-sm font-bold uppercase tracking-wider">
@@ -105,7 +105,7 @@ export default function GodModePage() {
                         <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center">
                             <Zap className="text-black" size={20} fill="currentColor" />
                         </div>
-                        <h2 className="text-[#fff200] text-xl font-bold font-heading">Active Session Controls</h2>
+                        <h2 className="text-[#fff200] text-base font-bold font-heading">Active Session Controls</h2>
                     </div>
                     <span className="px-2 py-1 bg-[#10b98126] text-[#10b981] text-[10px] font-bold rounded-md text-nowrap">2 Active</span>
                 </div>
@@ -132,7 +132,7 @@ export default function GodModePage() {
                     <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center">
                         <Users className="text-black" size={20} fill="currentColor" />
                     </div>
-                    <h2 className="text-[#fff200] text-xl font-bold font-heading">Manual Group Assignment</h2>
+                    <h2 className="text-[#fff200] text-base font-bold font-heading">Manual Group Assignment</h2>
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 items-end">

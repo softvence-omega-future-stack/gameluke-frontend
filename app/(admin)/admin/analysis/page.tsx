@@ -115,7 +115,7 @@ export default function AnalyticsPage() {
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-brand-secondary">Analytics & Reports</h1>
+                    <h1 className="text-xl sm:text-2xl font-bold text-brand-secondary">Analytics & Reports</h1>
                     <p className="text-brand-success mt-1 text-sm tracking-wider">Performance insights and engagement metrics</p>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
@@ -156,7 +156,7 @@ export default function AnalyticsPage() {
             {/* Charts Section */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                 <div className="bg-bg-card border-border p-6">
-                    <h2 className="text-[#fff200] text-xl font-bold mb-6">Player Traffic (Hourly)</h2>
+                    <h2 className="text-[#fff200] text-base font-bold mb-6">Player Traffic (Hourly)</h2>
                     <div className="h-[300px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
                             <AreaChart data={displayData.traffic}>
@@ -202,7 +202,7 @@ export default function AnalyticsPage() {
                 </div>
 
                 <div className="bg-bg-card border-border p-6">
-                    <h2 className="text-[#fff200] text-xl font-bold mb-6">Group Size Distribution</h2>
+                    <h2 className="text-[#fff200] text-base font-bold mb-6">Group Size Distribution</h2>
                     <div className="h-[300px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={distributionData} margin={{ bottom: 40, top: 10 }}>
@@ -242,7 +242,7 @@ export default function AnalyticsPage() {
             <div className="bg-bg-card border-border p-6 mb-8">
                 <div className="flex items-center gap-2 mb-6 text-[#fff200]">
                     <Trophy size={24} />
-                    <h2 className="text-xl font-bold font-heading">Top Performing Groups</h2>
+                    <h2 className="text-base font-bold font-heading">Top Performing Groups</h2>
                 </div>
 
                 <div className="space-y-4">
@@ -263,7 +263,7 @@ export default function AnalyticsPage() {
                                     #{group.id}
                                 </div>
                                 <div className="min-w-0">
-                                    <h3 className="font-bold text-lg text-white group-hover:text-[#fff200] transition-colors truncate">{group.name}</h3>
+                                    <h3 className="font-bold text-base text-white group-hover:text-[#fff200] transition-colors truncate">{group.name}</h3>
                                     <p className="text-gray-400 text-sm whitespace-nowrap">{group.games} games played</p>
                                 </div>
                             </div>
@@ -271,11 +271,11 @@ export default function AnalyticsPage() {
                             <div className="flex items-center justify-between sm:justify-end gap-6 md:gap-12 text-right relative z-10 w-full sm:w-auto border-t border-zinc-800/50 sm:border-0 pt-4 sm:pt-0">
                                 <div>
                                     <p className="text-gray-500 text-[10px] uppercase tracking-widest mb-1">Total Score</p>
-                                    <p className="text-xl font-bold text-white">{group.totalScore}</p>
+                                    <p className="text-lg font-bold text-white">{group.totalScore}</p>
                                 </div>
                                 <div className="sm:w-24">
                                     <p className="text-gray-500 text-[10px] uppercase tracking-widest mb-1">Avg per Game</p>
-                                    <p className="text-xl font-bold text-[#ec2c8a]">{group.avgScore}</p>
+                                    <p className="text-lg font-bold text-[#ec2c8a]">{group.avgScore}</p>
                                 </div>
                             </div>
 
@@ -290,12 +290,12 @@ export default function AnalyticsPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="p-6 rounded-2xl bg-gradient-to-br from-[#2a122e] to-[#141414] border border-[#4a1d52]">
                     <p className="text-gray-400 text-sm mb-4">Peak Hours</p>
-                    <h3 className="text-3xl font-bold text-purple-400 mb-4">2PM - 4PM</h3>
+                    <h3 className="text-xl font-bold text-purple-400 mb-4">2PM - 4PM</h3>
                     <p className="text-gray-500 text-xs">Highest player activity</p>
                 </div>
                 <div className="p-6 rounded-2xl bg-gradient-to-br from-[#122e1b] to-[#141414] border border-[#1d5225]">
                     <p className="text-gray-400 text-sm mb-4">Avg Group Size</p>
-                    <h3 className="text-3xl font-bold text-green-400 mb-4">4.8 players</h3>
+                    <h3 className="text-xl font-bold text-green-400 mb-4">4.8 players</h3>
                     <p className="text-gray-500 text-xs">Optimal utilization</p>
                 </div>
             </div>
@@ -318,7 +318,7 @@ function SummaryCard({ title, value, trend, icon, iconColor, hideTrendIcon = fal
             <div className="flex justify-between items-start mb-4">
                 <div>
                     <p className="text-gray-400 text-sm mb-1">{title}</p>
-                    <h3 className="text-4xl font-bold">{value}</h3>
+                    <h3 className="text-2xl font-bold">{value}</h3>
                 </div>
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center border ${iconColor}`}>
                     {icon}
