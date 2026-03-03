@@ -22,13 +22,13 @@ export default function GroupDetailsPage() {
                     alt="Arcade Background"
                     fill
                     style={{ objectFit: 'cover' }}
-                    className="brightness-[0.15] blur-[8px] scale-110"
+                    className="brightness-[0.3] blur-[6px] scale-110"
                     priority
                 />
             </div>
 
             {/* Main Card */}
-            <div className="relative z-10 w-full max-w-[600px] bg-[#111116]/95 border border-[#FFFF00]/60 rounded-2xl p-6 md:p-8 shadow-2xl backdrop-blur-md">
+            <div className="relative z-10 w-full max-w-xl mx-auto bg-[#111116]/95 border-border p-6 md:p-8 shadow-2xl backdrop-blur-md">
 
                 {/* Header Section */}
                 <div className="flex items-center gap-3 mb-8">
@@ -50,7 +50,7 @@ export default function GroupDetailsPage() {
                     {members.map((member) => (
                         <div
                             key={member.id}
-                            className="bg-[#1A1A23] border border-[#FFFF00]/40 rounded-xl p-3 flex items-center gap-3"
+                            className="bg-[#1A1A23] border-border p-3 flex items-center gap-3"
                         >
                             <div className="w-8 h-8 bg-[#E91E63] rounded-lg flex items-center justify-center text-white font-black text-xs shadow-md">
                                 {member.avatar}
@@ -66,13 +66,13 @@ export default function GroupDetailsPage() {
                 <div className="flex flex-col sm:flex-row gap-3">
                     <button
                         onClick={() => router.back()}
-                        className="flex-1 bg-white text-slate-900 font-black text-sm py-3 rounded-xl hover:bg-gray-200 transition-all active:scale-[0.98] shadow-lg cursor-pointer"
+                        className="flex-1 bg-white text-slate-900 font-black text-sm py-3 rounded-[14px] hover:bg-gray-200 transition-all active:scale-[0.98] shadow-lg cursor-pointer"
                     >
                         Back
                     </button>
                     <button
                         onClick={() => router.push("/confirm-team")}
-                        className="flex-1 bg-[#FFFF00] text-black font-black text-sm py-3 rounded-xl hover:bg-yellow-400 transition-all active:scale-[0.98] shadow-lg cursor-pointer"
+                        className="flex-1 bg-[#FFFF00] text-black font-black text-sm py-3 rounded-[14px] hover:bg-yellow-400 transition-all active:scale-[0.98] shadow-lg cursor-pointer"
                     >
                         Join Group
                     </button>

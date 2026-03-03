@@ -23,7 +23,7 @@ export default function WaitingRoomPage() {
                     alt="Arcade Background"
                     fill
                     style={{ objectFit: 'cover' }}
-                    className="brightness-[0.2] blur-[12px] scale-110"
+                    className="brightness-[0.3] blur-[6px] scale-110"
                     priority
                 />
             </div>
@@ -39,11 +39,11 @@ export default function WaitingRoomPage() {
                 </div>
 
                 <div className="text-center">
-                    <h1 className="text-[#FFFF00] text-3xl font-black uppercase tracking-tighter mb-2">
-                        Syncing Arena
+                    <h1 className="text-[#FFFF00] text-3xl font-black tracking-tighter mb-2">
+                        Waiting for Arena
                     </h1>
                     <p className="text-gray-400 text-sm font-medium">
-                        Preparing your team for battle...
+                        Please wait for the arena to be ready...
                     </p>
                 </div>
 

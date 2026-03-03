@@ -119,12 +119,12 @@ export default function ConfirmTeamPage() {
                     alt="Arcade Background"
                     fill
                     style={{ objectFit: 'cover' }}
-                    className="brightness-[0.1] blur-[10px] scale-110"
+                    className="brightness-[0.3] blur-[6px] scale-110"
                     priority
                 />
             </div>
 
-            <div className="relative z-10 w-full max-w-[600px] flex flex-col items-center">
+            <div className="relative z-10 w-full max-w-xl mx-auto flex flex-col items-center">
 
                 {/* Header Icon */}
                 <div className="w-12 h-12 bg-[#E91E63] rounded-xl flex items-center justify-center mb-5 shadow-lg shadow-pink-500/10">
@@ -143,10 +143,10 @@ export default function ConfirmTeamPage() {
 
                 {/* Configuration Badges */}
                 <div className="flex gap-2 mb-8">
-                    <div className="bg-[#1A1A23]/80 border border-[#A855F7]/40 rounded-full px-4 py-1 flex items-center">
+                    <div className="bg-[#1A1A23]/80 border-border rounded-full px-4 py-1 flex items-center">
                         <span className="text-[#A855F7] text-[11px] font-bold">Configuration: {configuration}</span>
                     </div>
-                    <div className="bg-[#1A1A23]/80 border border-[#2196F3]/40 rounded-full px-4 py-1 flex items-center">
+                    <div className="bg-[#1A1A23]/80 border-border rounded-full px-4 py-1 flex items-center">
                         <span className="text-[#2196F3] text-[11px] font-bold">{totalPlayers} Players</span>
                     </div>
                 </div>
@@ -158,7 +158,7 @@ export default function ConfirmTeamPage() {
                             key={team.id}
                             onDragOver={onDragOver}
                             onDrop={() => onDrop(team.id)}
-                            className="bg-[#111116]/80 border border-[#FFFF00]/30 rounded-[18px] p-4 shadow-xl backdrop-blur-sm transition-colors hover:border-[#FFFF00]/50"
+                            className="bg-[#111116]/80 border-border p-4 shadow-xl backdrop-blur-sm transition-colors hover:border-[#FFFF00]/50"
                         >
                             <div className="flex items-center gap-3 mb-4">
                                 <div className="p-1.5 rounded-lg" style={{ backgroundColor: `${team.color}20` }}>
@@ -176,10 +176,10 @@ export default function ConfirmTeamPage() {
                                         key={player.id}
                                         draggable
                                         onDragStart={() => onDragStart(player.id, team.id)}
-                                        className="bg-[#1A1A23] border border-[#FFFF00]/40 rounded-xl p-2.5 flex items-center gap-3 cursor-grab active:cursor-grabbing transition-all hover:bg-[#22222E]"
+                                        className="bg-[#1A1A23] border-border p-2.5 flex items-center gap-3 cursor-grab active:cursor-grabbing transition-all hover:bg-[#22222E]"
                                     >
                                         <div
-                                            className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-black text-xs shadow-md"
+                                            className="w-8 h-8 p-1 rounded-lg flex items-center justify-center text-white font-black text-xs shadow-md"
                                             style={{ backgroundColor: team.color }}
                                         >
                                             {player.avatar}
@@ -190,7 +190,7 @@ export default function ConfirmTeamPage() {
                                     </div>
                                 ))}
                                 {team.players.length === 0 && (
-                                    <div className="h-12 border-2 border-dashed border-gray-800 rounded-xl flex items-center justify-center text-gray-700 text-xs font-bold">
+                                    <div className="h-12 border border-dashed border-gray-800 rounded-xl flex items-center justify-center text-gray-700 text-xs font-bold">
                                         Drop player here
                                     </div>
                                 )}
@@ -203,14 +203,14 @@ export default function ConfirmTeamPage() {
                 <div className="w-full flex gap-3 mb-6">
                     <button
                         onClick={handleShuffle}
-                        className="flex-1 bg-white text-[#A855F7] font-black text-sm py-3 rounded-xl hover:bg-gray-100 transition-all active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+                        className="flex-1 bg-white text-[#A855F7] font-black text-sm py-3 rounded-[14px] hover:bg-gray-100 transition-all active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 cursor-pointer"
                     >
                         <Shuffle className="w-4 h-4" strokeWidth={3} />
                         Shuffle
                     </button>
                     <button
                         onClick={() => router.push("/waiting-room")}
-                        className="flex-1 bg-[#FFFF00] text-black font-black text-sm py-3 rounded-xl hover:bg-yellow-400 transition-all active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+                        className="flex-1 bg-[#FFFF00] text-black font-black text-sm py-3 rounded-[14px] hover:bg-yellow-400 transition-all active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 cursor-pointer"
                     >
                         <Check className="w-4 h-4" strokeWidth={4} />
                         Confirm
