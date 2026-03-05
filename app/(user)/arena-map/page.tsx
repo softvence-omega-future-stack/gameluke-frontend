@@ -23,7 +23,7 @@ export default function ArenaMapPage() {
                     alt="Arcade Background"
                     fill
                     style={{ objectFit: 'cover' }}
-                    className="brightness-[0.1] blur-[10px] scale-110"
+                    className="brightness-[0.3] blur-[6px] scale-110"
                     priority
                 />
             </div>
@@ -31,7 +31,7 @@ export default function ArenaMapPage() {
             <div className="relative z-10 w-full max-w-5xl flex flex-col items-center gap-6">
 
                 {/* Status Badge */}
-                <div className="flex items-center gap-2 bg-[#121216] border border-[#00E676]/30 rounded-full px-4 py-1.5 shadow-[0_0_15px_rgba(0,230,118,0.1)]">
+                <div className="flex items-center gap-2 bg-[#121216] border-border-2 px-4 py-1.5 shadow-[0_0_15px_rgba(0,230,118,0.1)]">
                     <div className="w-2.5 h-2.5 bg-[#00E676] rounded-full animate-pulse shadow-[0_0_8px_#00E676]"></div>
                     <span className="text-[#00E676] text-[10px] font-bold uppercase tracking-widest">Game Ready!</span>
                 </div>
@@ -47,7 +47,7 @@ export default function ArenaMapPage() {
                 </div>
 
                 {/* Game Ready Alert Card */}
-                <div className="w-full bg-[#1A1A23]/60 border border-[#00E676]/40 rounded-2xl p-4 flex items-center gap-4 backdrop-blur-sm">
+                <div className="w-full bg-[#1A1A23]/60 border-border-2 p-4 flex items-center gap-4 backdrop-blur-sm">
                     <div className="w-10 h-10 bg-[#00E676]/20 rounded-xl flex items-center justify-center">
                         <Sparkles className="text-[#00E676] w-5 h-5" />
                     </div>
@@ -60,7 +60,7 @@ export default function ArenaMapPage() {
                 </div>
 
                 {/* Team & Room Info Card */}
-                <div className="w-full bg-[#111116]/80 border border-[#FFFF00]/30 rounded-[20px] p-5 shadow-xl backdrop-blur-sm">
+                <div className="w-full bg-[#111116]/80 border-border p-5 shadow-xl backdrop-blur-sm">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-[#A855F7] rounded-xl flex items-center justify-center">
@@ -79,7 +79,7 @@ export default function ArenaMapPage() {
                         </div>
                     </div>
 
-                    <div className="bg-[#1A1A23] border border-[#FFFF00]/40 rounded-xl p-4 flex flex-col items-center">
+                    <div className="bg-[#1A1A23] border-border p-4 flex flex-col items-center">
                         <div className="w-12 h-12 bg-[#A855F7] rounded-xl flex items-center justify-center mb-3">
                             <MapPin className="text-white w-6 h-6" />
                         </div>
@@ -90,7 +90,7 @@ export default function ArenaMapPage() {
                 </div>
 
                 {/* Facility Map Card */}
-                <div className="w-full bg-[#111116]/80 border border-[#FFFF00]/30 rounded-[20px] p-5 shadow-xl backdrop-blur-sm">
+                <div className="w-full bg-[#111116]/80 border-border p-5 shadow-xl backdrop-blur-sm">
                     <div className="flex items-center gap-3 mb-4">
                         <div className="w-8 h-8 bg-yellow-900/40 rounded-lg flex items-center justify-center">
                             <MapPin className="text-[#FFFF00] w-4 h-4" />
@@ -101,7 +101,7 @@ export default function ArenaMapPage() {
                         </div>
                     </div>
 
-                    <div className="bg-black/40 border border-[#00E676]/40 rounded-xl aspect-[16/9] relative overflow-hidden group/map">
+                    <div className="bg-black/40 border-border-2 aspect-[16/9] relative overflow-hidden group/map">
                         {/* Actual Map Image */}
                         <Image
                             src="/images/room.webp"
@@ -113,7 +113,7 @@ export default function ArenaMapPage() {
                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)] pointer-events-none"></div>
                     </div>
 
-                    <div className="mt-4 bg-[#1A1A23]/60 rounded-lg p-2.5 border border-white/5 flex items-center gap-2">
+                    <div className="mt-4 bg-[#1A1A23]/60 rounded-lg p-2.5 border-border border-white/5 flex items-center gap-2">
                         <span className="text-[#FFFF00] text-xs">📍</span>
                         <p className="text-gray-400 text-[9px] font-medium italic">
                             <span className="text-[#FFFF00] font-bold not-italic">Tip:</span> Follow the purple markers to find your room. Ask staff if you need directions!
@@ -122,25 +122,25 @@ export default function ArenaMapPage() {
                 </div>
 
                 {/* Next Steps Card */}
-                <div className="w-full bg-[#111116]/80 border border-[#FFFF00]/30 rounded-[20px] p-5 shadow-xl backdrop-blur-sm">
+                <div className="w-full bg-[#111116]/80 border-border p-5 shadow-xl backdrop-blur-sm">
                     <h3 className="text-white text-sm font-bold uppercase mb-4 opacity-80">What happens next?</h3>
                     <div className="space-y-4">
                         <div className="flex gap-4">
-                            <div className="w-6 h-6 bg-[#1A1A23] border border-[#A855F7] rounded flex items-center justify-center text-[#A855F7] text-xs font-black shrink-0">1</div>
+                            <div className="w-6 h-6 bg-[#1A1A23] border-border rounded flex items-center justify-center text-[#A855F7] text-xs font-black shrink-0">1</div>
                             <div>
                                 <h4 className="text-white text-[11px] font-bold leading-none">Wait for admin approval</h4>
                                 <p className="text-[#00E676] text-[9px] font-medium mt-1">✓ Approved! You can now proceed</p>
                             </div>
                         </div>
                         <div className="flex gap-4">
-                            <div className="w-6 h-6 bg-[#1A1A23] border border-[#A855F7] rounded flex items-center justify-center text-[#A855F7] text-xs font-black shrink-0">2</div>
+                            <div className="w-6 h-6 bg-[#1A1A23] border-border rounded flex items-center justify-center text-[#A855F7] text-xs font-black shrink-0">2</div>
                             <div>
                                 <h4 className="text-white text-[11px] font-bold leading-none">Head to your room</h4>
                                 <p className="text-gray-500 text-[9px] font-medium mt-1">Use the map above to find your room</p>
                             </div>
                         </div>
                         <div className="flex gap-4">
-                            <div className="w-6 h-6 bg-[#1A1A23] border border-[#A855F7] rounded flex items-center justify-center text-[#A855F7] text-xs font-black shrink-0">3</div>
+                            <div className="w-6 h-6 bg-[#1A1A23] border-border rounded flex items-center justify-center text-[#A855F7] text-xs font-black shrink-0">3</div>
                             <div>
                                 <h4 className="text-white text-[11px] font-bold leading-none">Game automatically starts</h4>
                                 <p className="text-gray-500 text-[9px] font-medium mt-1">The system will detect when you enter and begin the timer</p>
@@ -151,8 +151,8 @@ export default function ArenaMapPage() {
 
                 {/* Final CTA */}
                 <button
-                    onClick={() => router.push("/login")}
-                    className="w-full bg-[#FFFF00] text-black font-black text-sm py-4 rounded-xl hover:bg-yellow-400 transition-all active:scale-[0.98] shadow-lg cursor-pointer mt-2"
+                    onClick={() => router.push("/start-game")}
+                    className="w-full bg-[#FFFF00] text-black font-black text-sm py-4 rounded-[14px] hover:bg-yellow-400 transition-all active:scale-[0.98] shadow-lg cursor-pointer mt-2"
                 >
                     I&apos;m at the Room - Start Game!
                 </button>

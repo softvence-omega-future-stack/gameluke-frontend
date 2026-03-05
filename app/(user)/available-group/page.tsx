@@ -42,13 +42,13 @@ export default function AvailableGroupPage() {
                     alt="Arcade Background"
                     fill
                     style={{ objectFit: 'cover' }}
-                    className="brightness-[0.15] blur-[8px] scale-110"
+                    className="brightness-[0.3] blur-[6px] scale-110"
                     priority
                 />
             </div>
 
             {/* Content overlay */}
-            <div className="relative z-10 w-full max-w-[500px] flex flex-col items-center">
+            <div className="relative z-10 w-full max-w-xl mx-auto flex flex-col items-center">
 
                 {/* Header Icon */}
                 <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center mb-5">
@@ -76,7 +76,7 @@ export default function AvailableGroupPage() {
                             <div
                                 key={group.id}
                                 onClick={() => router.push("/group-details")}
-                                className="group cursor-pointer bg-[#121216]/90 border border-[#FFFF00]/60 rounded-xl p-4 flex items-center justify-between transition-all hover:bg-[#1A1A1F] active:scale-[0.98] backdrop-blur-sm"
+                                className="group cursor-pointer bg-[#121216]/90 border-border p-4 flex items-center justify-between transition-all hover:bg-[#1A1A1F] active:scale-[0.98] backdrop-blur-sm"
                             >
                                 <div className="flex flex-col gap-0.5">
                                     <h3 className="text-white text-base font-bold">
@@ -104,7 +104,7 @@ export default function AvailableGroupPage() {
 
                 <button
                     onClick={() => router.push("/login")}
-                    className="mt-8 text-gray-500 hover:text-white transition-colors text-[11px] font-bold uppercase tracking-widest"
+                    className="mt-8 cursor-pointer text-gray-500 hover:text-white transition-colors text-[11px] font-bold uppercase tracking-widest"
                 >
                     Back to Login
                 </button>

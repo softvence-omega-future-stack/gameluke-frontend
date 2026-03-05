@@ -34,7 +34,7 @@ function Loginpage() {
             </div>
 
             {/* Content */}
-            <div className="relative z-10 flex flex-col items-center w-full max-w-[440px] px-6 py-6 sm:py-12">
+            <div className="relative z-10 flex flex-col items-center w-full max-w-xl mx-auto px-6 py-6 sm:py-12">
                 {/* Logo Section */}
                 <div className="mb-0">
                     <Image
@@ -56,7 +56,7 @@ function Loginpage() {
                 </div>
 
                 {/* Login Card */}
-                <div className="w-full bg-[#111111]/85 border-[1px] border-[#FFFF00] rounded-[20px] p-6 sm:p-8 backdrop-blur-md shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+                <div className="w-full bg-[#111111]/85 border-border p-6 sm:p-8 backdrop-blur-md shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-2xl">
                     <div className="flex items-center gap-2 mb-6">
                         {/* Purple Sparkle Icon */}
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-[#A855F7] fill-current">
@@ -71,7 +71,7 @@ function Loginpage() {
                             <input
                                 type="text"
                                 placeholder="Enter your first name"
-                                className="w-full bg-[#1F1F1F] border-[1px] border-[#FFFF00] rounded-xl py-2.5 px-4 text-white text-sm placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-[#FFFF00] transition-all"
+                                className="w-full bg-[#1F1F1F] border-border py-2.5 px-4 text-white text-sm placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-[#FFFF00] transition-all"
                                 value={formData.firstName}
                                 onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
                             />
@@ -82,7 +82,7 @@ function Loginpage() {
                             <input
                                 type="text"
                                 placeholder="Enter your last name"
-                                className="w-full bg-[#1F1F1F] border-[1px] border-[#FFFF00] rounded-xl py-2.5 px-4 text-white text-sm placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-[#FFFF00] transition-all"
+                                className="w-full bg-[#1F1F1F] border-border py-2.5 px-4 text-white text-sm placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-[#FFFF00] transition-all"
                                 value={formData.lastName}
                                 onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                             />
@@ -93,7 +93,7 @@ function Loginpage() {
                             <input
                                 type="email"
                                 placeholder="your.email@example.com"
-                                className="w-full bg-[#1F1F1F] border-[1px] border-[#FFFF00] rounded-xl py-2.5 px-4 text-[#4ADE80] text-sm placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-[#FFFF00] transition-all"
+                                className="w-full bg-[#1F1F1F] border-border py-2.5 px-4 text-[#4ADE80] text-sm placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-[#FFFF00] transition-all"
                                 value={formData.email}
                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                             />
@@ -102,7 +102,7 @@ function Loginpage() {
                         <button
                             type="button"
                             onClick={handleContinue}
-                            className="w-full cursor-pointer bg-white text-black font-bold text-sm py-3.5 rounded-xl hover:bg-gray-100 transition-all transform active:scale-[0.98] mt-4 shadow-lg shadow-black/20"
+                            className="w-full cursor-pointer bg-white text-black font-bold text-sm py-3.5 rounded-[14px] hover:bg-gray-100 transition-all transform active:scale-[0.98] mt-4 shadow-lg shadow-black/20"
                         >
                             Continue to Game
                         </button>

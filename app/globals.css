@@ -8,7 +8,7 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  
+
   /* Brand Colors */
   --color-brand-primary: #ffffff;
   --color-brand-secondary: #ffe600;
@@ -17,11 +17,11 @@
   --color-brand-success: #54d62c;
   --color-brand-warning: #ffc107;
   --color-brand-error: #ff4842;
-  
+
   /* Text Colors */
   --color-text-heading: #fff200;
   --color-text-secondary: #3dffb3;
-  
+
   /* Grey Scale */
   --color-grey-100: #f9fafb;
   --color-grey-200: #f4f6f8;
@@ -47,7 +47,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-inter),Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
 }
 
 
@@ -64,12 +64,16 @@ body {
   /* Chrome, Safari, Opera */
 }
 
-.border-border{
+.border-border {
   border-radius: 14px;
-  border: 1px solid var(--Secondary-Button, #FFE501);
+  border: 0.5px solid rgba(255, 229, 1, 0.8);
+}
+.border-border-3 {
+  border-radius: 14px;
+  border: 0.5px solid rgba(255, 229, 1, 0.6);
 }
 
-.border-border-2{
+.border-border-2 {
   border-radius: 14px;
-  border: 1px solid var(--Secondary-Text, #3AFEB2);
+  border: 0.5px solid rgba(58, 254, 178, 0.8);
 }
