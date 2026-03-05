@@ -69,9 +69,13 @@ export default function EndGamePage() {
 
                 {/* Header Card */}
                 <div className="bg-[#4D0F28] border-border p-4 flex flex-col items-center relative overflow-hidden">
-                    <div className="flex w-full justify-between items-start mb-2">
+                    <div className="flex w-full justify-between items-start mb-2 relative">
+
+                        {/* Left */}
                         <div className="flex flex-col">
-                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Time Remaining</span>
+                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                                Time Remaining
+                            </span>
                             <div className="flex items-center gap-2">
                                 <div className="p-1.5 bg-[#E91E63] rounded-lg">
                                     <Clock className="w-4 h-4 text-white" />
@@ -79,13 +83,26 @@ export default function EndGamePage() {
                                 <span className="text-2xl font-black">00:00</span>
                             </div>
                         </div>
-                        <h1 className="text-[#FFFF00] text-xl font-black uppercase tracking-tight absolute left-1/2 -translate-x-1/2 top-4">
+
+                        {/* Center title for Desktop */}
+                        <h1 className="hidden sm:block text-[#FFFF00] text-xl font-black uppercase tracking-tight absolute left-1/2 -translate-x-1/2 top-4">
                             Basketball Game
                         </h1>
+
+                        {/* Right */}
                         <div className="flex flex-col items-end">
-                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Total Score</span>
+
+                            {/* Title for Mobile */}
+                            <h1 className="sm:hidden text-[#FFFF00] text-lg text-nowrap font-black uppercase tracking-tight">
+                                Basketball Game
+                            </h1>
+
+                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                                Total Score
+                            </span>
                             <span className="text-2xl font-black">{totalScore}</span>
                         </div>
+
                     </div>
                     {/* Progress Bar (Empty/End state) */}
                     <div className="w-full h-2.5 bg-black/40 rounded-full mt-2 overflow-hidden border-border border-white/5">

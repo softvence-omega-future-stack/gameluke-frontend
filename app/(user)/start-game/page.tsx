@@ -82,9 +82,13 @@ export default function StartGamePage() {
 
                 {/* Header Card */}
                 <div className="bg-[#4D0F28] border-border p-4 flex flex-col items-center relative overflow-hidden">
-                    <div className="flex w-full justify-between items-start mb-2">
+                    <div className="flex w-full justify-between items-start mb-2 relative">
+
+                        {/* Left */}
                         <div className="flex flex-col">
-                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Time Remaining</span>
+                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                                Time Remaining
+                            </span>
                             <div className="flex items-center gap-2">
                                 <div className="p-1.5 bg-[#E91E63] rounded-lg">
                                     <Clock className="w-4 h-4 text-white" />
@@ -92,13 +96,27 @@ export default function StartGamePage() {
                                 <span className="text-2xl font-black">{formatTime(timeLeft)}</span>
                             </div>
                         </div>
-                        <h1 className="text-[#FFFF00] text-xl font-black uppercase tracking-tight absolute left-1/2 -translate-x-1/2 top-4">
-                            Basketball Game
-                        </h1>
+
+                        {/* Middle (Desktop) */}
+                        <div className="hidden sm:flex flex-col absolute left-1/2 -translate-x-1/2 top-4">
+                            <h1 className="text-[#FFFF00] text-xl font-black uppercase tracking-tight">
+                                Basketball Game
+                            </h1>
+                        </div>
+
+                        {/* Right */}
                         <div className="flex flex-col items-end">
-                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Total Score</span>
+                            {/* Mobile Title */}
+                            <h1 className="text-[#FFFF00] text-lg font-black uppercase text-nowrap tracking-tight sm:hidden">
+                                Basketball Game
+                            </h1>
+
+                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                                Total Score
+                            </span>
                             <span className="text-2xl font-black">0</span>
                         </div>
+
                     </div>
                     {/* Progress Bar */}
                     <div className="w-full h-2.5 bg-black/40 rounded-full mt-2 overflow-hidden border-border border-white/5">
@@ -112,7 +130,7 @@ export default function StartGamePage() {
                 {/* Game Rules Button */}
                 <button
                     onClick={() => setIsRulesModalOpen(true)}
-                    className="w-full bg-[#FFFF00] text-black font-black text-sm py-3 rounded-[14px] hover:bg-yellow-400 transition-all active:scale-[0.98] shadow-lg"
+                    className="w-full bg-[#FFFF00] text-black cursor-pointer font-black text-sm py-3 rounded-[14px] hover:bg-yellow-400 transition-all active:scale-[0.98] shadow-lg"
                 >
                     Game Rules
                 </button>

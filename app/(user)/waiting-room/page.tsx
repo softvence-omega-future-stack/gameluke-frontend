@@ -40,10 +40,10 @@ export default function WaitingRoomPage() {
 
                 <div className="text-center">
                     <h1 className="text-[#FFFF00] text-3xl font-black tracking-tighter mb-2">
-                        Waiting for Arena
+                        Waiting for room to be ready...
                     </h1>
                     <p className="text-gray-400 text-sm font-medium">
-                        Please wait for the arena to be ready...
+                        Please wait for the room to be ready...
                     </p>
                 </div>
 

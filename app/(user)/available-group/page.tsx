@@ -104,7 +104,7 @@ export default function AvailableGroupPage() {
 
                 <button
                     onClick={() => router.push("/login")}
-                    className="mt-8 text-gray-500 hover:text-white transition-colors text-[11px] font-bold uppercase tracking-widest"
+                    className="mt-8 cursor-pointer text-gray-500 hover:text-white transition-colors text-[11px] font-bold uppercase tracking-widest"
                 >
                     Back to Login
                 </button>

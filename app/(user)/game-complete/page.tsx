@@ -57,11 +57,11 @@ export default function GameCompletePage() {
                 />
             </div>
 
-            <div className="relative z-10 w-full max-w-5xl mx-auto flex flex-col items-center space-y-8">
+            <div className="relative z-10 w-full max-w-2xl mx-auto flex flex-col items-center space-y-8">
 
                 {/* Trophy Icon */}
-                <div className="bg-[#FFA500] p-6 rounded-[14px] shadow-[0_0_30px_rgba(255,165,0,0.3)]">
-                    <Trophy className="w-12 h-12 text-white" />
+                <div className="bg-[#FFA500] p-4 rounded-[14px] shadow-[0_0_30px_rgba(255,165,0,0.3)]">
+                    <Trophy className="w-10 h-10 text-white" />
                 </div>
 
                 <div className="text-center space-y-2">
@@ -101,11 +101,11 @@ export default function GameCompletePage() {
                 <div className="w-full space-y-4">
                     <button
                         onClick={() => router.push("/waiting-room")}
-                        className="w-full bg-[#FFFF00] text-black font-black text-sm py-4 rounded-[14px] hover:bg-yellow-400 transition-all active:scale-[0.98] shadow-lg"
+                        className="w-full bg-[#FFFF00] text-black cursor-pointer font-black text-sm py-4 rounded-[14px] hover:bg-yellow-400 transition-all active:scale-[0.98] shadow-lg"
                     >
                         Go to Next Room
                     </button>
-                    <button className="w-full bg-white text-blue-500 font-bold text-sm py-4 rounded-[14px] flex items-center justify-center gap-2 hover:bg-gray-100 transition-all active:scale-[0.98]">
+                    <button className="w-full bg-white text-blue-500 cursor-pointer font-bold text-sm py-4 rounded-[14px] flex items-center justify-center gap-2 hover:bg-gray-100 transition-all active:scale-[0.98]">
                         <Share2 className="w-4 h-4" />
                         Share Results
                     </button>
