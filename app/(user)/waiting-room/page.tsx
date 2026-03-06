@@ -10,7 +10,7 @@ export default function WaitingRoomPage() {
     useEffect(() => {
         // Simulate waiting for a few seconds before move to arena
         const timer = setTimeout(() => {
-            router.push("/arena-map");
+            router.push("/get-ready");
         }, 5000);
         return () => clearTimeout(timer);
     }, [router]);
