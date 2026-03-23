@@ -20,7 +20,7 @@ interface Station {
     active: boolean;
 }
 
-interface Room {
+interface Studio {
     id: string;
     name: string;
     status: "Occupied" | "Available";
@@ -30,10 +30,10 @@ interface Room {
     stations: Station[];
 }
 
-const allRooms: Room[] = [
+const allStudios: Studio[] = [
     {
         id: "1",
-        name: "Room 1",
+        name: "Studio 1",
         status: "Occupied",
         timeLeft: "07:50",
         group: "Team Phoenix",
@@ -46,7 +46,7 @@ const allRooms: Room[] = [
     },
     {
         id: "2",
-        name: "Room 2",
+        name: "Studio 2",
         status: "Available",
         timeLeft: "00:00",
         group: "None",
@@ -59,7 +59,7 @@ const allRooms: Room[] = [
     },
     {
         id: "3",
-        name: "Room 3",
+        name: "Studio 3",
         status: "Occupied",
         timeLeft: "12:30",
         group: "Dragon Squad",
@@ -72,7 +72,7 @@ const allRooms: Room[] = [
     },
     {
         id: "4",
-        name: "Room 4",
+        name: "Studio 4",
         status: "Occupied",
         timeLeft: "05:15",
         group: "Ninja Warriors",
@@ -85,7 +85,7 @@ const allRooms: Room[] = [
     },
     {
         id: "5",
-        name: "Room 5",
+        name: "Studio 5",
         status: "Available",
         timeLeft: "00:00",
         group: "None",
@@ -98,7 +98,7 @@ const allRooms: Room[] = [
     },
     {
         id: "6",
-        name: "Room 6",
+        name: "Studio 6",
         status: "Occupied",
         timeLeft: "09:45",
         group: "Elite Squad",
@@ -111,7 +111,7 @@ const allRooms: Room[] = [
     },
     {
         id: "7",
-        name: "Room 7",
+        name: "Studio 7",
         status: "Available",
         timeLeft: "00:00",
         group: "None",
@@ -124,7 +124,7 @@ const allRooms: Room[] = [
     },
     {
         id: "8",
-        name: "Room 8",
+        name: "Studio 8",
         status: "Occupied",
         timeLeft: "14:20",
         group: "Shadow Legends",
@@ -137,7 +137,7 @@ const allRooms: Room[] = [
     },
     {
         id: "9",
-        name: "Room 9",
+        name: "Studio 9",
         status: "Occupied",
         timeLeft: "03:30",
         group: "Thunder Titans",
@@ -150,7 +150,7 @@ const allRooms: Room[] = [
     },
     {
         id: "10",
-        name: "Room 10",
+        name: "Studio 10",
         status: "Available",
         timeLeft: "00:00",
         group: "None",
@@ -163,7 +163,7 @@ const allRooms: Room[] = [
     },
     {
         id: "11",
-        name: "Room 11",
+        name: "Studio 11",
         status: "Occupied",
         timeLeft: "11:00",
         group: "Cosmic Force",
@@ -176,7 +176,7 @@ const allRooms: Room[] = [
     },
     {
         id: "12",
-        name: "Room 12",
+        name: "Studio 12",
         status: "Occupied",
         timeLeft: "08:05",
         group: "Cyber Warriors",
@@ -189,7 +189,7 @@ const allRooms: Room[] = [
     },
     {
         id: "13",
-        name: "Room 13",
+        name: "Studio 13",
         status: "Available",
         timeLeft: "00:00",
         group: "None",
@@ -202,7 +202,7 @@ const allRooms: Room[] = [
     },
     {
         id: "14",
-        name: "Room 14",
+        name: "Studio 14",
         status: "Occupied",
         timeLeft: "06:40",
         group: "Iron Wolves",
@@ -215,7 +215,7 @@ const allRooms: Room[] = [
     },
     {
         id: "15",
-        name: "Room 15",
+        name: "Studio 15",
         status: "Available",
         timeLeft: "00:00",
         group: "None",
@@ -228,7 +228,7 @@ const allRooms: Room[] = [
     },
     {
         id: "16",
-        name: "Room 16",
+        name: "Studio 16",
         status: "Occupied",
         timeLeft: "15:55",
         group: "Apex Predators",
@@ -241,7 +241,7 @@ const allRooms: Room[] = [
     },
     {
         id: "17",
-        name: "Room 17",
+        name: "Studio 17",
         status: "Occupied",
         timeLeft: "02:10",
         group: "Storm Breakers",
@@ -254,7 +254,7 @@ const allRooms: Room[] = [
     },
     {
         id: "18",
-        name: "Room 18",
+        name: "Studio 18",
         status: "Available",
         timeLeft: "00:00",
         group: "None",
@@ -267,7 +267,7 @@ const allRooms: Room[] = [
     },
     {
         id: "19",
-        name: "Room 19",
+        name: "Studio 19",
         status: "Occupied",
         timeLeft: "10:25",
         group: "Galaxy Knights",
@@ -280,29 +280,29 @@ const allRooms: Room[] = [
     },
 ];
 
-export default function AllRoomsPage() {
+export default function AllStudiosPage() {
     const [search, setSearch] = useState("");
     const [filter, setFilter] = useState<"All" | "Occupied" | "Available">("All");
-    const [pausedRooms, setPausedRooms] = useState<Set<string>>(new Set());
+    const [pausedStudios, setPausedStudios] = useState<Set<string>>(new Set());
 
-    const togglePause = (roomId: string) => {
-        setPausedRooms(prev => {
+    const togglePause = (studioId: string) => {
+        setPausedStudios(prev => {
             const next = new Set(prev);
-            if (next.has(roomId)) next.delete(roomId);
-            else next.add(roomId);
+            if (next.has(studioId)) next.delete(studioId);
+            else next.add(studioId);
             return next;
         });
     };
 
-    const filtered = allRooms.filter(room => {
-        const matchesSearch = room.name.toLowerCase().includes(search.toLowerCase()) ||
-            room.group.toLowerCase().includes(search.toLowerCase());
-        const matchesFilter = filter === "All" || room.status === filter;
+    const filtered = allStudios.filter(studio => {
+        const matchesSearch = studio.name.toLowerCase().includes(search.toLowerCase()) ||
+            studio.group.toLowerCase().includes(search.toLowerCase());
+        const matchesFilter = filter === "All" || studio.status === filter;
         return matchesSearch && matchesFilter;
     });
 
-    const occupiedCount = allRooms.filter(r => r.status === "Occupied").length;
-    const availableCount = allRooms.filter(r => r.status === "Available").length;
+    const occupiedCount = allStudios.filter(r => r.status === "Occupied").length;
+    const availableCount = allStudios.filter(r => r.status === "Available").length;
 
     return (
         <div className="space-y-6 max-w-8xl mx-auto">
@@ -316,9 +316,9 @@ export default function AllRoomsPage() {
                         <ArrowLeft className="w-4 h-4" />
                     </Link>
                     <div>
-                        <h1 className="text-xl sm:text-2xl font-bold text-brand-secondary">All Rooms</h1>
+                        <h1 className="text-xl sm:text-2xl font-bold text-brand-secondary">All Studios</h1>
                         <p className="text-brand-success mt-0.5 text-sm tracking-wider">
-                            Overview of all {allRooms.length} rooms
+                            Overview of all {allStudios.length} studios
                         </p>
                     </div>
                 </div>
@@ -344,7 +344,7 @@ export default function AllRoomsPage() {
                         type="text"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Search by room name or group..."
+                        placeholder="Search by studio name or group..."
                         className="w-full bg-bg-card border-border py-2.5 pl-11 pr-4 text-zinc-300 focus:outline-none focus:border-brand-secondary focus:ring-1 focus:ring-brand-secondary transition-all placeholder:text-zinc-600 text-sm rounded-lg italic"
                     />
                 </div>
@@ -368,37 +368,37 @@ export default function AllRoomsPage() {
 
             {/* Results count */}
             <p className="text-zinc-500 text-xs font-bold uppercase tracking-wider">
-                Showing {filtered.length} of {allRooms.length} rooms
+                Showing {filtered.length} of {allStudios.length} studios
             </p>
 
-            {/* Rooms Grid */}
+            {/* Studios Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-                {filtered.map((room) => {
-                    const isPaused = pausedRooms.has(room.id);
+                {filtered.map((studio) => {
+                    const isPaused = pausedStudios.has(studio.id);
                     return (
                         <div
-                            key={room.id}
+                            key={studio.id}
                             className="bg-bg-dark border-border rounded-2xl p-4 sm:p-5 space-y-4 transition-colors"
                         >
-                            {/* Room Header */}
+                            {/* Studio Header */}
                             <div className="flex items-center justify-between gap-3">
                                 <div className="flex items-center gap-3">
                                     <div className="w-9 h-9 bg-brand-accent rounded-xl flex items-center justify-center shrink-0">
                                         <MapPin className="text-white w-4 h-4" />
                                     </div>
                                     <div>
-                                        <h3 className="text-white text-sm font-bold line-clamp-1">{room.name}</h3>
+                                        <h3 className="text-white text-sm font-bold line-clamp-1">{studio.name}</h3>
                                         <span className={cn(
                                             "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md flex items-center gap-1 w-fit mt-0.5",
-                                            room.status === "Occupied"
+                                            studio.status === "Occupied"
                                                 ? "bg-brand-success/20 text-brand-success"
                                                 : "bg-brand-info/20 text-brand-info"
                                         )}>
-                                            {room.status === "Occupied"
+                                            {studio.status === "Occupied"
                                                 ? <CheckCircle2 className="w-2.5 h-2.5" />
                                                 : <Users className="w-2.5 h-2.5" />
                                             }
-                                            {room.status}
+                                            {studio.status}
                                         </span>
                                     </div>
                                 </div>
@@ -407,7 +407,7 @@ export default function AllRoomsPage() {
                                     <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider flex items-center justify-end gap-1">
                                         <Clock className="w-3 h-3" /> Time Left
                                     </p>
-                                    <p className="text-white text-base font-bold">{room.timeLeft}</p>
+                                    <p className="text-white text-base font-bold">{studio.timeLeft}</p>
                                 </div>
                             </div>
 
@@ -415,12 +415,12 @@ export default function AllRoomsPage() {
                             <div className="bg-bg-deep border border-zinc-800 rounded-xl p-3 flex items-center justify-between gap-3">
                                 <div className="space-y-0.5 min-w-0">
                                     <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider">Current Group</p>
-                                    <p className="text-white font-bold truncate text-sm">{room.group}</p>
-                                    <p className="text-zinc-600 text-xs truncate">{room.details}</p>
+                                    <p className="text-white font-bold truncate text-sm">{studio.group}</p>
+                                    <p className="text-zinc-600 text-xs truncate">{studio.details}</p>
                                 </div>
-                                {room.status === "Occupied" && (
+                                {studio.status === "Occupied" && (
                                     <div
-                                        onClick={() => togglePause(room.id)}
+                                        onClick={() => togglePause(studio.id)}
                                         title={isPaused ? "Resume" : "Pause"}
                                         className="bg-brand-secondary p-1.5 rounded-md cursor-pointer hover:bg-brand-secondary/90 shrink-0 transition-colors"
                                     >
@@ -436,7 +436,7 @@ export default function AllRoomsPage() {
                             <div className="space-y-2">
                                 <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider">Stations</p>
                                 <div className="space-y-1.5">
-                                    {room.stations.map((station) => (
+                                    {studio.stations.map((station) => (
                                         <div
                                             key={station.id}
                                             className="bg-bg-card border border-zinc-800 rounded-lg px-3 py-2 flex items-center justify-between"
@@ -455,8 +455,8 @@ export default function AllRoomsPage() {
                                 </div>
                             </div>
 
-                            {/* Assign button for available rooms */}
-                            {room.status === "Available" && (
+                            {/* Assign button for available studios */}
+                            {studio.status === "Available" && (
                                 <button className="w-full cursor-pointer bg-brand-secondary text-black py-2 rounded-xl font-bold hover:bg-brand-secondary/90 transition-colors text-xs">
                                     Available for Assign Group
                                 </button>
@@ -469,7 +469,7 @@ export default function AllRoomsPage() {
             {filtered.length === 0 && (
                 <div className="text-center py-16 text-zinc-500">
                     <MapPin className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                    <p className="font-bold text-sm uppercase tracking-wider">No rooms found</p>
+                    <p className="font-bold text-sm uppercase tracking-wider">No studios found</p>
                     <p className="text-xs mt-1">Try adjusting your search or filter</p>
                 </div>
             )}

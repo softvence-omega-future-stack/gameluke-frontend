@@ -209,7 +209,7 @@ export default function ConfirmTeamPage() {
                         Shuffle
                     </button>
                     <button
-                        onClick={() => router.push("/waiting-room")}
+                        onClick={() => router.push("/waiting-studio")}
                         className="flex-1 bg-[#FFFF00] text-black font-black text-sm py-3 rounded-[14px] hover:bg-yellow-400 transition-all active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 cursor-pointer"
                     >
                         <Check className="w-4 h-4" strokeWidth={4} />

@@ -15,12 +15,12 @@ import {
 
 interface SessionCardProps {
     teamName: string;
-    room: string;
+    studio: string;
     players: number;
     timeRemaining: string;
 }
 
-const SessionCard = ({ teamName, room, players, timeRemaining }: SessionCardProps) => (
+const SessionCard = ({ teamName, studio, players, timeRemaining }: SessionCardProps) => (
     <div className="bg-bg-card border-border p-5 mb-4 transition-all duration-300">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex items-center gap-4">
@@ -29,7 +29,7 @@ const SessionCard = ({ teamName, room, players, timeRemaining }: SessionCardProp
                 </div>
                 <div>
                     <h3 className="text-base font-bold text-white transition-colors">{teamName}</h3>
-                    <p className="text-gray-400 text-sm">{room} • {players} players</p>
+                    <p className="text-gray-400 text-sm">{studio} • {players} players</p>
                 </div>
             </div>
 
@@ -60,16 +60,16 @@ const groupOptions = [
     { value: "group3", label: "Cyber Warriors" },
 ];
 
-const roomOptions = [
-    { value: "room1", label: "Room 1" },
-    { value: "room2", label: "Room 2" },
-    { value: "room3", label: "Room 3" },
-    { value: "room4", label: "Room 4" },
+const studioOptions = [
+    { value: "studio1", label: "Studio 1" },
+    { value: "studio2", label: "Studio 2" },
+    { value: "studio3", label: "Studio 3" },
+    { value: "studio4", label: "Studio 4" },
 ];
 
 export default function GodModePage() {
     const [selectedGroup, setSelectedGroup] = useState("");
-    const [selectedRoom, setSelectedRoom] = useState("");
+    const [selectedStudio, setSelectedStudio] = useState("");
 
     return (
         <div className="min-h-screen text-white">
@@ -113,13 +113,13 @@ export default function GodModePage() {
                 <div className="space-y-4">
                     <SessionCard
                         teamName="Team Phoenix"
-                        room="Room 1"
+                        studio="Studio 1"
                         players={6}
                         timeRemaining="09:00"
                     />
                     <SessionCard
                         teamName="Dragon Squad"
-                        room="Room 2"
+                        studio="Studio 2"
                         players={4}
                         timeRemaining="11:20"
                     />
@@ -148,11 +148,11 @@ export default function GodModePage() {
 
                     <div className="lg:col-span-2">
                         <CustomDropdown
-                            label="Assign to Room"
-                            options={roomOptions}
-                            value={selectedRoom}
-                            onChange={setSelectedRoom}
-                            placeholder="Select Room name"
+                            label="Assign to Studio"
+                            options={studioOptions}
+                            value={selectedStudio}
+                            onChange={setSelectedStudio}
+                            placeholder="Select Studio name"
                         />
                     </div>
 

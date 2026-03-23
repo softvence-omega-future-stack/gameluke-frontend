@@ -100,10 +100,10 @@ export default function GameCompletePage() {
                 {/* Action Buttons */}
                 <div className="w-full space-y-4">
                     <button
-                        onClick={() => router.push("/waiting-room")}
+                        onClick={() => router.push("/waiting-studio")}
                         className="w-full bg-[#FFFF00] text-black cursor-pointer font-black text-sm py-4 rounded-[14px] hover:bg-yellow-400 transition-all active:scale-[0.98] shadow-lg"
                     >
-                        Go to Next Room
+                        Go to Next Studio
                     </button>
                     <button className="w-full bg-white text-blue-500 cursor-pointer font-bold text-sm py-4 rounded-[14px] flex items-center justify-center gap-2 hover:bg-gray-100 transition-all active:scale-[0.98]">
                         <Share2 className="w-4 h-4" />

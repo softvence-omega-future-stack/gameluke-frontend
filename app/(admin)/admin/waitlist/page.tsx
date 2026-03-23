@@ -164,7 +164,7 @@ export default function WaitlistPage() {
                             <div className="flex items-center gap-3 w-full md:w-auto mt-2 md:mt-0">
                                 <button className="flex-1 cursor-pointer md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-2 bg-brand-secondary text-black rounded-lg font-bold hover:bg-brand-secondary/90 transition-colors whitespace-nowrap text-sm sm:text-base">
                                     <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-black" />
-                                    Assign Room
+                                    Assign Studio
                                 </button>
                                 <button className="p-2.5 cursor-pointer sm:p-2 text-zinc-500 border border-zinc-800 rounded-lg hover:bg-brand-error/20 hover:text-brand-error hover:border-brand-error/50 transition-all shrink-0">
                                     <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -183,7 +183,7 @@ export default function WaitlistPage() {
                 <div>
                     <h5 className="text-brand-info text-sm sm:text-base font-bold uppercase tracking-wider">Auto-Promotion Active</h5>
                     <p className="text-zinc-400 text-xs sm:text-sm mt-0.5">
-                        Groups will be automatically assigned to rooms as they become available, following the First In First Out priority order.
+                        Groups will be automatically assigned to studios as they become available, following the First In First Out priority order.
                     </p>
                 </div>
             </div>

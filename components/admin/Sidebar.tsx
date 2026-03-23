@@ -13,6 +13,8 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLogoutMutation } from "@/redux/api/admin/authApi";
+import Cookies from "js-cookie";
 
 const menuItems = [
   {
@@ -21,9 +23,9 @@ const menuItems = [
     href: "/admin/live-monitoring",
   },
   {
-    title: "Room Management",
+    title: "Studio Management",
     icon: Settings,
-    href: "/admin/room-management",
+    href: "/admin/studio-management",
   },
   {
     title: "Waitlist",
@@ -55,9 +57,18 @@ interface SidebarProps {
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
+  const [logout] = useLogoutMutation();
 
-  const handleSignOut = () => {
-    router.push("/admin/signin");
+  const handleSignOut = async () => {
+    try {
+      await logout({}).unwrap();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      Cookies.remove('accessToken');
+      Cookies.remove('refreshToken');
+      router.push("/admin/signin");
+    }
   };
 
   return (

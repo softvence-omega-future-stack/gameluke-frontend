@@ -12,33 +12,39 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { useLoginMutation } from "@/redux/api/admin/authApi";
+import Cookies from "js-cookie";
 
 export default function AdminLoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const [login, { isLoading }] = useLoginMutation();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError("");
 
     try {
-      // Mock login logic
-      console.log("Logging in...", { email, password });
-
-      // Simulating API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-
-      // Redirect to dashboard
-      router.push("/admin/live-monitoring");
-    } catch {
-      setError("Invalid email or password. Please try again.");
-    } finally {
-      setIsLoading(false);
+      const result = await login({ email, password }).unwrap();
+      
+      if (result.success && result.data?.accessToken) {
+        // Set tokens in cookies
+        Cookies.set('accessToken', result.data.accessToken, { expires: 1 }); // 1 day expiration
+        if (result.data.refreshToken) {
+          Cookies.set('refreshToken', result.data.refreshToken, { expires: 7 });
+        }
+        
+        // Redirect to dashboard
+        router.push("/admin/live-monitoring");
+      } else {
+        setError(result.message || "Login failed. Please try again.");
+      }
+    } catch (err: any) {
+      setError(err?.data?.message || "Invalid email or password. Please try again.");
     }
   };
 

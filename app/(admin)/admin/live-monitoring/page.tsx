@@ -17,7 +17,7 @@ import Link from "next/link";
 
 const stats = [
     {
-        label: "Active Rooms",
+        label: "Active Studios",
         value: "14/18",
         icon: MapPin,
         color: "text-brand-success",
@@ -44,7 +44,7 @@ interface Station {
     active: boolean;
 }
 
-interface Room {
+interface Studio {
     id: string;
     name: string;
     status: string;
@@ -54,10 +54,10 @@ interface Room {
     stations: Station[];
 }
 
-const rooms: Room[] = [
+const studios: Studio[] = [
     {
         id: "1",
-        name: "Room 1",
+        name: "Studio 1",
         status: "Occupied",
         timeLeft: "07:50",
         group: "Team Phoenix",
@@ -70,7 +70,7 @@ const rooms: Room[] = [
     },
     {
         id: "2",
-        name: "Room 2",
+        name: "Studio 2",
         status: "Available",
         timeLeft: "00:00",
         group: "None",
@@ -87,13 +87,13 @@ export default function LiveMonitoringPage() {
     const [isCreateGroupModalOpen, setIsCreateGroupModalOpen] = useState(false);
     const [groupName, setGroupName] = useState("");
     const [isChildrenFavour, setIsChildrenFavour] = useState(false);
-    const [pausedRooms, setPausedRooms] = useState<Set<string>>(new Set());
+    const [pausedStudios, setPausedStudios] = useState<Set<string>>(new Set());
 
-    const togglePause = (roomId: string) => {
-        setPausedRooms(prev => {
+    const togglePause = (studioId: string) => {
+        setPausedStudios(prev => {
             const next = new Set(prev);
-            if (next.has(roomId)) next.delete(roomId);
-            else next.add(roomId);
+            if (next.has(studioId)) next.delete(studioId);
+            else next.add(studioId);
             return next;
         });
     };
@@ -138,9 +138,9 @@ export default function LiveMonitoringPage() {
                 ))}
             </div>
 
-            {/* Live Room Status Section */}
+            {/* Live Studio Status Section */}
             <div className="space-y-6">
-                <h2 className="text-lg sm:text-xl font-bold text-white">Live Room Status</h2>
+                <h2 className="text-lg sm:text-xl font-bold text-white">Live Studio Status</h2>
 
                 {/* Search Bar */}
                 <div className="relative group">
@@ -149,34 +149,34 @@ export default function LiveMonitoringPage() {
                     </div>
                     <input
                         type="text"
-                        placeholder="Search by the Room name or game"
+                        placeholder="Search by the Studio name or game"
                         className="w-full bg-bg-card border-border py-3 md:py-3.5 pl-12 pr-4 text-zinc-300 focus:outline-none focus:border-brand-secondary focus:ring-1 focus:ring-brand-secondary transition-all placeholder:text-zinc-600 text-sm sm:text-base italic"
                     />
                 </div>
 
-                {/* Room Cards Grid */}
+                {/* Studio Cards Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
-                    {rooms.map((room) => (
-                        <div key={room.id} className="bg-bg-dark border-border rounded-2xl sm:rounded-3xl p-4 sm:p-6 space-y-4 sm:space-y-6 transition-colors">
+                    {studios.map((studio) => (
+                        <div key={studio.id} className="bg-bg-dark border-border rounded-2xl sm:rounded-3xl p-4 sm:p-6 space-y-4 sm:space-y-6 transition-colors">
                             <div className="flex flex-col xs:flex-row items-start xs:items-center justify-between gap-4">
                                 <div className="flex items-center gap-3">
                                     <div className="w-9 h-9 sm:w-10 sm:h-10 bg-brand-accent rounded-xl flex items-center justify-center shrink-0">
                                         <MapPin className="text-white w-4 h-4 sm:w-5 h-5" />
                                     </div>
                                     <div>
-                                        <h3 className="text-white text-base sm:text-lg font-bold line-clamp-1">{room.name}</h3>
+                                        <h3 className="text-white text-base sm:text-lg font-bold line-clamp-1">{studio.name}</h3>
                                         <span className={cn(
                                             "text-[10px] sm:text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded-md flex items-center gap-1 w-fit mt-1",
-                                            room.status === "Occupied" ? "bg-brand-success/20 text-brand-success" : "bg-brand-info/20 text-brand-info"
+                                            studio.status === "Occupied" ? "bg-brand-success/20 text-brand-success" : "bg-brand-info/20 text-brand-info"
                                         )}>
-                                            {room.status === "Occupied" ? <CheckCircle2 className="w-3 h-3" /> : <Users className="w-3 h-3" />}
-                                            {room.status}
+                                            {studio.status === "Occupied" ? <CheckCircle2 className="w-3 h-3" /> : <Users className="w-3 h-3" />}
+                                            {studio.status}
                                         </span>
                                     </div>
                                 </div>
                                 <div className="text-left xs:text-right">
                                     <p className="text-zinc-500 text-[10px] sm:text-xs font-bold uppercase tracking-wider">Time Left</p>
-                                    <p className="text-white text-lg sm:text-xl font-bold">{room.timeLeft}</p>
+                                    <p className="text-white text-lg sm:text-xl font-bold">{studio.timeLeft}</p>
                                 </div>
                             </div>
 
@@ -184,16 +184,16 @@ export default function LiveMonitoringPage() {
                             <div className="bg-bg-deep border border-zinc-800 rounded-xl sm:rounded-2xl p-4 sm:p-5 flex items-center justify-between gap-4">
                                 <div className="space-y-1 min-w-0">
                                     <p className="text-zinc-500 text-[10px] sm:text-xs font-bold uppercase tracking-wider">Current Group</p>
-                                    <p className="text-white font-bold truncate text-sm sm:text-base">{room.group}</p>
-                                    <p className="text-zinc-600 text-xs sm:text-sm truncate">{room.details}</p>
+                                    <p className="text-white font-bold truncate text-sm sm:text-base">{studio.group}</p>
+                                    <p className="text-zinc-600 text-xs sm:text-sm truncate">{studio.details}</p>
                                 </div>
-                                {room.status === "Occupied" && (
+                                {studio.status === "Occupied" && (
                                     <div
-                                        onClick={() => togglePause(room.id)}
+                                        onClick={() => togglePause(studio.id)}
                                         className="bg-brand-secondary p-1.5 sm:p-2 rounded-md cursor-pointer hover:bg-brand-secondary/90 shrink-0 transition-colors"
-                                        title={pausedRooms.has(room.id) ? "Resume" : "Pause"}
+                                        title={pausedStudios.has(studio.id) ? "Resume" : "Pause"}
                                     >
-                                        {pausedRooms.has(room.id)
+                                        {pausedStudios.has(studio.id)
                                             ? <Play className="w-3.5 h-3.5 sm:w-4 h-4 text-black" fill="black" />
                                             : <Pause className="w-3.5 h-3.5 sm:w-4 h-4 text-black" fill="black" />
                                         }
@@ -205,7 +205,7 @@ export default function LiveMonitoringPage() {
                             <div className="space-y-3">
                                 <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider">Stations</p>
                                 <div className="grid grid-cols-1 sm:grid-cols-1 gap-2">
-                                    {room.stations.map((station) => (
+                                    {studio.stations.map((station) => (
                                         <div key={station.id} className="bg-bg-card border border-zinc-800 rounded-xl p-3 flex items-center justify-between transition-colors">
                                             <div className="flex items-center gap-3">
                                                 <div className="bg-brand-success/20 p-1 rounded-md">
@@ -219,7 +219,7 @@ export default function LiveMonitoringPage() {
                                 </div>
                             </div>
 
-                            {room.status === "Available" && (
+                            {studio.status === "Available" && (
                                 <button className="w-full cursor-pointer bg-brand-secondary text-black py-2.5 sm:py-3 rounded-xl font-bold hover:bg-brand-secondary/90 transition-colors mt-2 text-sm sm:text-base">
                                     Available for Assign Group
                                 </button>
@@ -229,10 +229,10 @@ export default function LiveMonitoringPage() {
                 </div>
 
                 <Link
-                    href="/admin/live-monitoring/all-rooms"
+                    href="/admin/live-monitoring/all-studios"
                     className="w-full cursor-pointer py-2.5 sm:py-3 bg-white text-black font-bold text-sm sm:text-base rounded-xl sm:rounded-2xl hover:bg-zinc-200 transition-colors shadow-2xl shadow-white/5 flex items-center justify-center"
                 >
-                    See All Rooms
+                    See All Studios
                 </Link>
             </div>
             {/* Create Group Modal */}

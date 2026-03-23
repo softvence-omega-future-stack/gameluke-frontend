@@ -61,7 +61,7 @@ export default function AvailableGroupPage() {
                         Welcome, {userName} !
                     </h1>
                     <p className="text-gray-400 text-sm font-medium">
-                        Join or create your gaming group
+                        Join your gaming group
                     </p>
                 </div>
 

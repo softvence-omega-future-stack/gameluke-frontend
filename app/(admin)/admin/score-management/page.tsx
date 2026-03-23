@@ -46,7 +46,7 @@ const stats = [
 const historyData = [
   {
     team: "Team Phoenix",
-    room: "Room 1",
+    studio: "Studio 1",
     station: "Station A",
     oldScore: 150,
     newScore: 160,
@@ -60,7 +60,7 @@ const currentScores = [
   {
     id: 1,
     name: "Future Stack",
-    room: "Room 1",
+    studio: "Studio 1",
     stations: "Station A,B,C",
     games: "Basketball",
     time: "13m ago",
@@ -93,7 +93,7 @@ const currentScores = [
   {
     id: 2,
     name: "Team Phoenix",
-    room: "Room 1",
+    studio: "Studio 1",
     stations: "Station A,B,C",
     games: "Basketball",
     time: "13m ago",
@@ -103,7 +103,7 @@ const currentScores = [
   {
     id: 3,
     name: "Alpha",
-    room: "Room 1",
+    studio: "Studio 1",
     stations: "Station A,B,C",
     games: "Basketball",
     time: "13m ago",
@@ -113,7 +113,7 @@ const currentScores = [
   {
     id: 4,
     name: "Omega",
-    room: "Room 1",
+    studio: "Studio 1",
     stations: "Station A,B,C",
     games: "Basketball",
     time: "13m ago",
@@ -460,7 +460,7 @@ export default function ScoreManagementPage() {
                         {item.team}
                       </span>
                       <span className="text-zinc-500 text-[10px] sm:text-xs font-medium">
-                        {item.room} - {item.station}
+                        {item.studio} - {item.station}
                       </span>
                     </div>
                     <div className="flex items-center gap-4">
@@ -497,7 +497,7 @@ export default function ScoreManagementPage() {
       {/* Current Scores List */}
       <div className="space-y-6">
         <h2 className="text-lg sm:text-xl font-bold text-white">
-          {showHistory ? "Room Wise Current Scores" : "Current Scores"}
+          {showHistory ? "Studio Wise Current Scores" : "Current Scores"}
         </h2>
         <div className="grid grid-cols-1 gap-4">
           {currentScores.map((row, index) => (
@@ -520,7 +520,7 @@ export default function ScoreManagementPage() {
                 </div>
                 <div className="grid grid-cols-2 lg:flex items-center gap-x-4 gap-y-1 text-zinc-500 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
                   <p>
-                    Room: <span className="text-zinc-300 ml-1">{row.room}</span>
+                    Studio: <span className="text-zinc-300 ml-1">{row.studio}</span>
                   </p>
                   <p>
                     Station:{" "}
