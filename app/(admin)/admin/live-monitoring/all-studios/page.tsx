@@ -10,282 +10,49 @@ import {
     Search,
     ArrowLeft,
     Clock,
+    AlertCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
-interface Station {
-    id: string;
-    team?: string;
-    active: boolean;
-}
+import { useGetStudiosQuery } from "@/redux/api/admin/studiosApi";
 
-interface Studio {
-    id: string;
-    name: string;
-    status: "Occupied" | "Available";
-    timeLeft: string;
-    group: string;
-    details: string;
-    stations: Station[];
-}
-
-const allStudios: Studio[] = [
-    {
-        id: "1",
-        name: "Studio 1",
-        status: "Occupied",
-        timeLeft: "07:50",
-        group: "Team Phoenix",
-        details: "6 players • 5 games played today",
-        stations: [
-            { id: "A", team: "Team 01", active: true },
-            { id: "B", team: "Team 02", active: true },
-            { id: "C", team: "Team 03", active: true },
-        ],
-    },
-    {
-        id: "2",
-        name: "Studio 2",
-        status: "Available",
-        timeLeft: "00:00",
-        group: "None",
-        details: "5 games played today",
-        stations: [
-            { id: "A", active: true },
-            { id: "B", active: true },
-            { id: "C", active: true },
-        ],
-    },
-    {
-        id: "3",
-        name: "Studio 3",
-        status: "Occupied",
-        timeLeft: "12:30",
-        group: "Dragon Squad",
-        details: "4 players • 3 games played today",
-        stations: [
-            { id: "A", team: "Dragon A", active: true },
-            { id: "B", team: "Dragon B", active: true },
-            { id: "C", team: "Dragon C", active: true },
-        ],
-    },
-    {
-        id: "4",
-        name: "Studio 4",
-        status: "Occupied",
-        timeLeft: "05:15",
-        group: "Ninja Warriors",
-        details: "5 players • 4 games played today",
-        stations: [
-            { id: "A", team: "Ninja A", active: true },
-            { id: "B", team: "Ninja B", active: true },
-            { id: "C", team: "Ninja C", active: true },
-        ],
-    },
-    {
-        id: "5",
-        name: "Studio 5",
-        status: "Available",
-        timeLeft: "00:00",
-        group: "None",
-        details: "2 games played today",
-        stations: [
-            { id: "A", active: true },
-            { id: "B", active: true },
-            { id: "C", active: true },
-        ],
-    },
-    {
-        id: "6",
-        name: "Studio 6",
-        status: "Occupied",
-        timeLeft: "09:45",
-        group: "Elite Squad",
-        details: "6 players • 6 games played today",
-        stations: [
-            { id: "A", team: "Elite A", active: true },
-            { id: "B", team: "Elite B", active: true },
-            { id: "C", team: "Elite C", active: true },
-        ],
-    },
-    {
-        id: "7",
-        name: "Studio 7",
-        status: "Available",
-        timeLeft: "00:00",
-        group: "None",
-        details: "1 game played today",
-        stations: [
-            { id: "A", active: true },
-            { id: "B", active: true },
-            { id: "C", active: true },
-        ],
-    },
-    {
-        id: "8",
-        name: "Studio 8",
-        status: "Occupied",
-        timeLeft: "14:20",
-        group: "Shadow Legends",
-        details: "3 players • 2 games played today",
-        stations: [
-            { id: "A", team: "Shadow A", active: true },
-            { id: "B", team: "Shadow B", active: true },
-            { id: "C", team: "Shadow C", active: true },
-        ],
-    },
-    {
-        id: "9",
-        name: "Studio 9",
-        status: "Occupied",
-        timeLeft: "03:30",
-        group: "Thunder Titans",
-        details: "5 players • 7 games played today",
-        stations: [
-            { id: "A", team: "Thunder A", active: true },
-            { id: "B", team: "Thunder B", active: true },
-            { id: "C", team: "Thunder C", active: true },
-        ],
-    },
-    {
-        id: "10",
-        name: "Studio 10",
-        status: "Available",
-        timeLeft: "00:00",
-        group: "None",
-        details: "4 games played today",
-        stations: [
-            { id: "A", active: true },
-            { id: "B", active: true },
-            { id: "C", active: true },
-        ],
-    },
-    {
-        id: "11",
-        name: "Studio 11",
-        status: "Occupied",
-        timeLeft: "11:00",
-        group: "Cosmic Force",
-        details: "4 players • 3 games played today",
-        stations: [
-            { id: "A", team: "Cosmic A", active: true },
-            { id: "B", team: "Cosmic B", active: true },
-            { id: "C", team: "Cosmic C", active: true },
-        ],
-    },
-    {
-        id: "12",
-        name: "Studio 12",
-        status: "Occupied",
-        timeLeft: "08:05",
-        group: "Cyber Warriors",
-        details: "6 players • 5 games played today",
-        stations: [
-            { id: "A", team: "Cyber A", active: true },
-            { id: "B", team: "Cyber B", active: true },
-            { id: "C", team: "Cyber C", active: true },
-        ],
-    },
-    {
-        id: "13",
-        name: "Studio 13",
-        status: "Available",
-        timeLeft: "00:00",
-        group: "None",
-        details: "3 games played today",
-        stations: [
-            { id: "A", active: true },
-            { id: "B", active: true },
-            { id: "C", active: true },
-        ],
-    },
-    {
-        id: "14",
-        name: "Studio 14",
-        status: "Occupied",
-        timeLeft: "06:40",
-        group: "Iron Wolves",
-        details: "5 players • 4 games played today",
-        stations: [
-            { id: "A", team: "Wolf A", active: true },
-            { id: "B", team: "Wolf B", active: true },
-            { id: "C", team: "Wolf C", active: true },
-        ],
-    },
-    {
-        id: "15",
-        name: "Studio 15",
-        status: "Available",
-        timeLeft: "00:00",
-        group: "None",
-        details: "0 games played today",
-        stations: [
-            { id: "A", active: true },
-            { id: "B", active: true },
-            { id: "C", active: true },
-        ],
-    },
-    {
-        id: "16",
-        name: "Studio 16",
-        status: "Occupied",
-        timeLeft: "15:55",
-        group: "Apex Predators",
-        details: "6 players • 6 games played today",
-        stations: [
-            { id: "A", team: "Apex A", active: true },
-            { id: "B", team: "Apex B", active: true },
-            { id: "C", team: "Apex C", active: true },
-        ],
-    },
-    {
-        id: "17",
-        name: "Studio 17",
-        status: "Occupied",
-        timeLeft: "02:10",
-        group: "Storm Breakers",
-        details: "4 players • 2 games played today",
-        stations: [
-            { id: "A", team: "Storm A", active: true },
-            { id: "B", team: "Storm B", active: true },
-            { id: "C", team: "Storm C", active: true },
-        ],
-    },
-    {
-        id: "18",
-        name: "Studio 18",
-        status: "Available",
-        timeLeft: "00:00",
-        group: "None",
-        details: "1 game played today",
-        stations: [
-            { id: "A", active: true },
-            { id: "B", active: true },
-            { id: "C", active: true },
-        ],
-    },
-    {
-        id: "19",
-        name: "Studio 19",
-        status: "Occupied",
-        timeLeft: "10:25",
-        group: "Galaxy Knights",
-        details: "5 players • 3 games played today",
-        stations: [
-            { id: "A", team: "Galaxy A", active: true },
-            { id: "B", team: "Galaxy B", active: true },
-            { id: "C", team: "Galaxy C", active: true },
-        ],
-    },
-];
+const StudioSkeleton = () => (
+    <div className="bg-bg-dark border-border rounded-2xl p-4 sm:p-5 space-y-4 animate-pulse">
+        <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-zinc-800 rounded-xl" />
+                <div className="space-y-1.5">
+                    <div className="h-3.5 w-24 bg-zinc-800 rounded" />
+                    <div className="h-2.5 w-16 bg-zinc-800 rounded" />
+                </div>
+            </div>
+            <div className="space-y-1">
+                <div className="h-2.5 w-10 bg-zinc-800 rounded ml-auto" />
+                <div className="h-4 w-12 bg-zinc-800 rounded ml-auto" />
+            </div>
+        </div>
+        <div className="bg-bg-deep border border-zinc-800 rounded-xl p-3 h-16" />
+        <div className="space-y-2">
+            <div className="h-2.5 w-16 bg-zinc-800 rounded" />
+            <div className="space-y-1.5">
+                <div className="h-8 bg-zinc-800 rounded-lg" />
+                <div className="h-8 bg-zinc-800 rounded-lg" />
+            </div>
+        </div>
+    </div>
+);
 
 export default function AllStudiosPage() {
     const [search, setSearch] = useState("");
-    const [filter, setFilter] = useState<"All" | "Occupied" | "Available">("All");
-    const [pausedStudios, setPausedStudios] = useState<Set<string>>(new Set());
+    const [filter, setFilter] = useState<"All" | "OCCUPIED" | "AVAILABLE">("All");
 
-    const togglePause = (studioId: string) => {
+    const { data: studiosData, isLoading: isStudiosLoading, isError: isStudiosError, refetch: refetchStudios } = useGetStudiosQuery();
+    const studios = studiosData?.data || [];
+
+    const [pausedStudios, setPausedStudios] = useState<Set<number>>(new Set());
+
+    const togglePause = (studioId: number) => {
         setPausedStudios(prev => {
             const next = new Set(prev);
             if (next.has(studioId)) next.delete(studioId);
@@ -294,15 +61,15 @@ export default function AllStudiosPage() {
         });
     };
 
-    const filtered = allStudios.filter(studio => {
+    const filtered = studios.filter(studio => {
         const matchesSearch = studio.name.toLowerCase().includes(search.toLowerCase()) ||
-            studio.group.toLowerCase().includes(search.toLowerCase());
+            studio.gameName.toLowerCase().includes(search.toLowerCase());
         const matchesFilter = filter === "All" || studio.status === filter;
         return matchesSearch && matchesFilter;
     });
 
-    const occupiedCount = allStudios.filter(r => r.status === "Occupied").length;
-    const availableCount = allStudios.filter(r => r.status === "Available").length;
+    const occupiedCount = studios.filter(r => r.status === "OCCUPIED").length;
+    const availableCount = studios.filter(r => r.status === "AVAILABLE").length;
 
     return (
         <div className="space-y-6 max-w-8xl mx-auto">
@@ -318,7 +85,7 @@ export default function AllStudiosPage() {
                     <div>
                         <h1 className="text-xl sm:text-2xl font-bold text-brand-secondary">All Studios</h1>
                         <p className="text-brand-success mt-0.5 text-sm tracking-wider">
-                            Overview of all {allStudios.length} studios
+                            Overview of all {studios.length} studios
                         </p>
                     </div>
                 </div>
@@ -344,12 +111,12 @@ export default function AllStudiosPage() {
                         type="text"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Search by studio name or group..."
+                        placeholder="Search by studio name or game..."
                         className="w-full bg-bg-card border-border py-2.5 pl-11 pr-4 text-zinc-300 focus:outline-none focus:border-brand-secondary focus:ring-1 focus:ring-brand-secondary transition-all placeholder:text-zinc-600 text-sm rounded-lg italic"
                     />
                 </div>
                 <div className="flex gap-2">
-                    {(["All", "Occupied", "Available"] as const).map(f => (
+                    {(["All", "OCCUPIED", "AVAILABLE"] as const).map(f => (
                         <button
                             key={f}
                             onClick={() => setFilter(f)}
@@ -360,7 +127,7 @@ export default function AllStudiosPage() {
                                     : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-white"
                             )}
                         >
-                            {f}
+                            {f.charAt(0) + f.slice(1).toLowerCase()}
                         </button>
                     ))}
                 </div>
@@ -368,111 +135,133 @@ export default function AllStudiosPage() {
 
             {/* Results count */}
             <p className="text-zinc-500 text-xs font-bold uppercase tracking-wider">
-                Showing {filtered.length} of {allStudios.length} studios
+                Showing {filtered.length} of {studios.length} studios
             </p>
 
             {/* Studios Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
-                {filtered.map((studio) => {
-                    const isPaused = pausedStudios.has(studio.id);
-                    return (
-                        <div
-                            key={studio.id}
-                            className="bg-bg-dark border-border rounded-2xl p-4 sm:p-5 space-y-4 transition-colors"
+                {isStudiosLoading ? (
+                    Array.from({ length: 9 }).map((_, i) => (
+                        <StudioSkeleton key={i} />
+                    ))
+                ) : isStudiosError ? (
+                    <div className="col-span-full py-16 flex flex-col items-center justify-center bg-bg-dark border border-brand-error/20 rounded-3xl">
+                        <AlertCircle className="w-12 h-12 text-brand-error mb-4 opacity-50" />
+                        <h3 className="text-white text-lg font-bold">Failed to load studios</h3>
+                        <p className="text-zinc-500 text-sm mt-1">Please check your connection and try again.</p>
+                        <button
+                            onClick={() => refetchStudios()}
+                            className="mt-6 px-6 py-2 bg-brand-secondary text-black rounded-xl font-bold hover:bg-brand-secondary/90 transition-colors"
                         >
-                            {/* Studio Header */}
-                            <div className="flex items-center justify-between gap-3">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-9 h-9 bg-brand-accent rounded-xl flex items-center justify-center shrink-0">
-                                        <MapPin className="text-white w-4 h-4" />
+                            Try Again
+                        </button>
+                    </div>
+                ) : filtered.length === 0 ? (
+                    <div className="col-span-full text-center py-20 bg-bg-dark border border-zinc-800 rounded-3xl">
+                        <MapPin className="w-10 h-10 mx-auto mb-3 text-zinc-800" />
+                        <p className="font-bold text-sm uppercase tracking-wider text-zinc-500">No studios found</p>
+                        <p className="text-xs mt-1 text-zinc-600">Try adjusting your search or filter</p>
+                    </div>
+                ) : (
+                    filtered.map((studio) => {
+                        const isPaused = pausedStudios.has(studio.id);
+                        return (
+                            <div
+                                key={studio.id}
+                                className="bg-bg-dark border-border rounded-2xl p-4 sm:p-5 space-y-4 transition-colors"
+                            >
+                                {/* Studio Header */}
+                                <div className="flex items-center justify-between gap-3">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-9 h-9 bg-brand-accent rounded-xl flex items-center justify-center shrink-0">
+                                            <MapPin className="text-white w-4 h-4" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-white text-sm font-bold line-clamp-1">{studio.name}</h3>
+                                            <span className={cn(
+                                                "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md flex items-center gap-1 w-fit mt-0.5",
+                                                studio.status === "OCCUPIED"
+                                                    ? "bg-brand-success/20 text-brand-success"
+                                                    : "bg-brand-info/20 text-brand-info"
+                                            )}>
+                                                {studio.status === "OCCUPIED"
+                                                    ? <CheckCircle2 className="w-2.5 h-2.5" />
+                                                    : <Users className="w-2.5 h-2.5" />
+                                                }
+                                                {studio.status}
+                                            </span>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h3 className="text-white text-sm font-bold line-clamp-1">{studio.name}</h3>
-                                        <span className={cn(
-                                            "text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md flex items-center gap-1 w-fit mt-0.5",
-                                            studio.status === "Occupied"
-                                                ? "bg-brand-success/20 text-brand-success"
-                                                : "bg-brand-info/20 text-brand-info"
-                                        )}>
-                                            {studio.status === "Occupied"
-                                                ? <CheckCircle2 className="w-2.5 h-2.5" />
-                                                : <Users className="w-2.5 h-2.5" />
-                                            }
-                                            {studio.status}
-                                        </span>
+                                    {/* Time Left */}
+                                    <div className="text-right shrink-0">
+                                        <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider flex items-center justify-end gap-1">
+                                            <Clock className="w-3 h-3" /> Time Left
+                                        </p>
+                                        <p className="text-white text-base font-bold">{"--"}</p>
                                     </div>
                                 </div>
-                                {/* Time Left */}
-                                <div className="text-right shrink-0">
-                                    <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider flex items-center justify-end gap-1">
-                                        <Clock className="w-3 h-3" /> Time Left
-                                    </p>
-                                    <p className="text-white text-base font-bold">{studio.timeLeft}</p>
-                                </div>
-                            </div>
 
-                            {/* Group Info */}
-                            <div className="bg-bg-deep border border-zinc-800 rounded-xl p-3 flex items-center justify-between gap-3">
-                                <div className="space-y-0.5 min-w-0">
-                                    <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider">Current Group</p>
-                                    <p className="text-white font-bold truncate text-sm">{studio.group}</p>
-                                    <p className="text-zinc-600 text-xs truncate">{studio.details}</p>
-                                </div>
-                                {studio.status === "Occupied" && (
-                                    <div
-                                        onClick={() => togglePause(studio.id)}
-                                        title={isPaused ? "Resume" : "Pause"}
-                                        className="bg-brand-secondary p-1.5 rounded-md cursor-pointer hover:bg-brand-secondary/90 shrink-0 transition-colors"
-                                    >
-                                        {isPaused
-                                            ? <Play className="w-3.5 h-3.5 text-black" fill="black" />
-                                            : <Pause className="w-3.5 h-3.5 text-black" fill="black" />
-                                        }
+                                {/* Group Info */}
+                                <div className="bg-bg-deep border border-zinc-800 rounded-xl p-3 flex items-center justify-between gap-3">
+                                    <div className="space-y-0.5 min-w-0">
+                                        <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider">Current Group</p>
+                                        <p className="text-white font-bold truncate text-sm">{"N/A"}</p>
+                                        <p className="text-zinc-600 text-xs truncate">{studio.gameName}</p>
                                     </div>
+                                    {studio.status === "OCCUPIED" && (
+                                        <div
+                                            onClick={() => togglePause(studio.id)}
+                                            title={isPaused ? "Resume" : "Pause"}
+                                            className="bg-brand-secondary p-1.5 rounded-md cursor-pointer hover:bg-brand-secondary/90 shrink-0 transition-colors"
+                                        >
+                                            {isPaused
+                                                ? <Play className="w-3.5 h-3.5 text-black" fill="black" />
+                                                : <Pause className="w-3.5 h-3.5 text-black" fill="black" />
+                                            }
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Stations */}
+                                <div className="space-y-2">
+                                    <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider">Stations</p>
+                                    <div className="space-y-1.5">
+                                        {studio.stations.map((station) => (
+                                            <div
+                                                key={station.id}
+                                                className="bg-bg-card border border-zinc-800 rounded-lg px-3 py-2 flex items-center justify-between"
+                                            >
+                                                <div className="flex items-center gap-2">
+                                                    <div className={cn(
+                                                        "p-0.5 rounded",
+                                                        station.status === "ACTIVE" ? "bg-brand-success/20" : "bg-zinc-800"
+                                                    )}>
+                                                        <CheckCircle2 className={cn(
+                                                            "w-3.5 h-3.5",
+                                                            station.status === "ACTIVE" ? "text-brand-success" : "text-zinc-600"
+                                                        )} />
+                                                    </div>
+                                                    <span className="text-white text-xs font-semibold">Station {station.name}</span>
+                                                </div>
+                                                {/* {station.currentSubTeamId && (
+                                                    <span className="text-zinc-400 text-xs font-medium">{station.currentSubTeamId}</span>
+                                                )} */}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Assign button for available studios */}
+                                {studio.status === "AVAILABLE" && (
+                                    <button className="w-full cursor-pointer bg-brand-secondary text-black py-2 rounded-xl font-bold hover:bg-brand-secondary/90 transition-colors text-xs">
+                                        Available for Assign Group
+                                    </button>
                                 )}
                             </div>
-
-                            {/* Stations */}
-                            <div className="space-y-2">
-                                <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider">Stations</p>
-                                <div className="space-y-1.5">
-                                    {studio.stations.map((station) => (
-                                        <div
-                                            key={station.id}
-                                            className="bg-bg-card border border-zinc-800 rounded-lg px-3 py-2 flex items-center justify-between"
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                <div className="bg-brand-success/20 p-0.5 rounded">
-                                                    <CheckCircle2 className="w-3.5 h-3.5 text-brand-success" />
-                                                </div>
-                                                <span className="text-white text-xs font-semibold">Station {station.id}</span>
-                                            </div>
-                                            {station.team && (
-                                                <span className="text-zinc-400 text-xs font-medium">{station.team}</span>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Assign button for available studios */}
-                            {studio.status === "Available" && (
-                                <button className="w-full cursor-pointer bg-brand-secondary text-black py-2 rounded-xl font-bold hover:bg-brand-secondary/90 transition-colors text-xs">
-                                    Available for Assign Group
-                                </button>
-                            )}
-                        </div>
-                    );
-                })}
+                        );
+                    })
+                )}
             </div>
-
-            {filtered.length === 0 && (
-                <div className="text-center py-16 text-zinc-500">
-                    <MapPin className="w-10 h-10 mx-auto mb-3 opacity-30" />
-                    <p className="font-bold text-sm uppercase tracking-wider">No studios found</p>
-                    <p className="text-xs mt-1">Try adjusting your search or filter</p>
-                </div>
-            )}
         </div>
     );
 }

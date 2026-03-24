@@ -1,21 +1,40 @@
 "use client";
 
 import Image from "next/image";
+import { AlertTriangle } from "lucide-react";
 import { useState } from "react";
+
+import { usePlayerLoginMutation } from "@/redux/api/player/playerApi";
 
 function Loginpage() {
     const [formData, setFormData] = useState({
-        firstName: "",
-        lastName: "",
+        name: "",
         email: ""
     });
+    const [error, setError] = useState<string | null>(null);
+    const [playerLogin, { isLoading }] = usePlayerLoginMutation();
 
-    const handleContinue = () => {
-        if (formData.firstName) {
-            localStorage.setItem("userName", formData.firstName);
-            window.location.href = "/available-group";
-        } else {
-            alert("Please enter your name");
+    const handleContinue = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError(null);
+        
+        if (!formData.name || !formData.email) {
+            setError("Please enter your name and email");
+            return;
+        }
+
+        try {
+            const response = await playerLogin(formData).unwrap();
+            
+            if (response.success) {
+                localStorage.setItem("playerId", response.data.id);
+                localStorage.setItem("playerName", response.data.name);
+                localStorage.setItem("playerEmail", response.data.email);
+                window.location.href = "/available-group";
+            }
+        } catch (err: any) {
+            setError(err?.data?.message || "Failed to login. Please try again.");
+            console.error("Login error:", err);
         }
     };
 
@@ -56,7 +75,7 @@ function Loginpage() {
                 </div>
 
                 {/* Login Card */}
-                <div className="w-full bg-[#111111]/85 border-border p-6 sm:p-8 backdrop-blur-md shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-2xl">
+                <div className="w-full bg-[#111111]/85 border border-[#333] p-6 sm:p-8 backdrop-blur-md shadow-[0_20px_50px_rgba(0,0,0,0.5)] rounded-2xl">
                     <div className="flex items-center gap-2 mb-6">
                         {/* Purple Sparkle Icon */}
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-[#A855F7] fill-current">
@@ -65,46 +84,53 @@ function Loginpage() {
                         <h2 className="text-white text-xl font-bold tracking-tight">Player Login</h2>
                     </div>
 
-                    <form className="space-y-3">
-                        <div className="space-y-1">
-                            <label className="text-white/90 text-xs font-medium ml-1">First Name</label>
+                    <form onSubmit={handleContinue} className="space-y-4">
+                        {error && (
+                            <div className="bg-red-500/10 border border-red-500/50 p-3 rounded-lg flex items-center gap-2 mb-4">
+                                <AlertTriangle className="w-4 h-4 text-red-500" />
+                                <p className="text-red-500 text-xs font-medium">{error}</p>
+                            </div>
+                        )}
+
+                        <div className="space-y-1.5">
+                            <label className="text-white/90 text-xs font-bold uppercase tracking-wider ml-1">Full Name</label>
                             <input
                                 type="text"
-                                placeholder="Enter your first name"
-                                className="w-full bg-[#1F1F1F] border-border py-2.5 px-4 text-white text-sm placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-[#FFFF00] transition-all"
-                                value={formData.firstName}
-                                onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                                placeholder="Enter your full name"
+                                className="w-full bg-[#1F1F1F] border border-[#333] py-3 px-4 text-white text-sm placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-[#FFFF00] transition-all rounded-xl"
+                                value={formData.name}
+                                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                required
+                                disabled={isLoading}
                             />
                         </div>
 
-                        <div className="space-y-1">
-                            <label className="text-white/90 text-xs font-medium ml-1">Last Name</label>
-                            <input
-                                type="text"
-                                placeholder="Enter your last name"
-                                className="w-full bg-[#1F1F1F] border-border py-2.5 px-4 text-white text-sm placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-[#FFFF00] transition-all"
-                                value={formData.lastName}
-                                onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                            />
-                        </div>
-
-                        <div className="space-y-1">
-                            <label className="text-white/90 text-xs font-medium ml-1">Email Address</label>
+                        <div className="space-y-1.5">
+                            <label className="text-white/90 text-xs font-bold uppercase tracking-wider ml-1">Email Address</label>
                             <input
                                 type="email"
                                 placeholder="your.email@example.com"
-                                className="w-full bg-[#1F1F1F] border-border py-2.5 px-4 text-[#4ADE80] text-sm placeholder:text-gray-500 focus:outline-none focus:ring-1 focus:ring-[#FFFF00] transition-all"
+                                className="w-full bg-[#1F1F1F] border border-[#333] py-3 px-4 text-[#4ADE80] text-sm placeholder:text-gray-600 focus:outline-none focus:ring-1 focus:ring-[#FFFF00] transition-all rounded-xl"
                                 value={formData.email}
                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                required
+                                disabled={isLoading}
                             />
                         </div>
 
                         <button
-                            type="button"
-                            onClick={handleContinue}
-                            className="w-full cursor-pointer bg-white text-black font-bold text-sm py-3.5 rounded-[14px] hover:bg-gray-100 transition-all transform active:scale-[0.98] mt-4 shadow-lg shadow-black/20"
+                            type="submit"
+                            disabled={isLoading}
+                            className="w-full cursor-pointer bg-white text-black font-bold text-sm py-3.5 rounded-xl hover:bg-gray-100 transition-all transform active:scale-[0.98] mt-4 shadow-lg shadow-black/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         >
-                            Continue to Game
+                            {isLoading ? (
+                                <>
+                                    <div className="w-4 h-4 border-2 border-black/20 border-t-black rounded-full animate-spin" />
+                                    Connecting...
+                                </>
+                            ) : (
+                                "Continue to Game"
+                            )}
                         </button>
 
                         <p className="text-center text-gray-500 text-[11px] font-medium mt-6">

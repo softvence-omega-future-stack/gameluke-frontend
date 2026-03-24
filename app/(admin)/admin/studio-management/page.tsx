@@ -15,6 +15,9 @@ import {
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 
+import { useGetStudiosQuery, useLockStudioMutation, useUnlockStudioMutation, useToggleManualOverrideMutation } from "@/redux/api/admin/studiosApi";
+import { useEffect } from "react";
+
 type StationStatus = "Active" | "Inactive" | "Defective";
 
 interface Station {
@@ -27,44 +30,65 @@ interface Station {
 
 interface Studio {
   id: string;
+  studioNumber: number;
   name: string;
   isLocked: boolean;
   stations: Station[];
   allowManualOverride: boolean;
 }
 
-const initialStudios: Studio[] = [
-  {
-    id: "studio-1",
-    name: "Studio 1",
-    isLocked: false,
-    allowManualOverride: true,
-    stations: [
-      { id: "1-a", name: "Station A", status: "Active" },
-      { id: "1-b", name: "Station B", status: "Active" },
-      { id: "1-c", name: "Station C", status: "Active" },
-    ],
-  },
-  {
-    id: "studio-2",
-    name: "Studio 2",
-    isLocked: false,
-    allowManualOverride: true,
-    stations: [
-      { id: "2-a", name: "Station A", status: "Active" },
-      {
-        id: "2-b",
-        name: "Station B",
-        status: "Defective",
-        warning: "Sensor malfunction",
-      },
-      { id: "2-c", name: "Station C", status: "Active" },
-    ],
-  },
-];
+const StudioManagementSkeleton = () => (
+  <div className="bg-bg-card border-border p-6 md:p-8 flex flex-col h-full animate-pulse">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+      <div className="flex items-center gap-4">
+        <div className="w-12 h-12 rounded-xl bg-zinc-800" />
+        <div className="space-y-2">
+          <div className="h-4 w-32 bg-zinc-800 rounded" />
+          <div className="h-3 w-16 bg-zinc-800 rounded" />
+        </div>
+      </div>
+      <div className="h-10 w-32 bg-zinc-800 rounded-xl" />
+    </div>
+    <div className="space-y-6 flex-1">
+      <div className="h-3 w-20 bg-zinc-800 rounded" />
+      <div className="space-y-4">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="bg-[#1e293b]/20 border border-zinc-800 rounded-2xl p-4 h-32" />
+        ))}
+      </div>
+    </div>
+    <div className="mt-8 pt-6 border-t border-zinc-800 flex justify-between items-center">
+      <div className="h-3 w-32 bg-zinc-800 rounded" />
+      <div className="h-6 w-11 bg-zinc-800 rounded-full" />
+    </div>
+  </div>
+);
 
 export default function StudioManagementPage() {
-  const [studios, setStudios] = useState<Studio[]>(initialStudios);
+  const [studios, setStudios] = useState<Studio[]>([]);
+  const { data: studiosData, isLoading, isError, refetch } = useGetStudiosQuery();
+  const [lockStudio] = useLockStudioMutation();
+  const [unlockStudio] = useUnlockStudioMutation();
+  const [toggleManualOverride] = useToggleManualOverrideMutation();
+
+  useEffect(() => {
+    if (studiosData?.data) {
+      const mappedStudios: Studio[] = studiosData.data.map(s => ({
+        id: s.id.toString(),
+        studioNumber: s.studioNumber,
+        name: s.name,
+        isLocked: s.status === "MAINTENANCE" || s.status === "LOCKED",
+        allowManualOverride: s.manualOverride,
+        stations: s.stations.map(st => ({
+          id: st.id,
+          name: `Station ${st.name}`,
+          status: st.status === "ACTIVE" ? "Active" : st.status === "DEFECTIVE" ? "Defective" : "Inactive",
+          warning: st.defectReason || undefined,
+        }))
+      }));
+      setStudios(mappedStudios);
+    }
+  }, [studiosData]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isDefectModalOpen, setIsDefectModalOpen] = useState(false);
   const [selectedStation, setSelectedStation] = useState<{
@@ -125,23 +149,73 @@ export default function StudioManagementPage() {
     }
   };
 
-  const toggleStudioLock = (studioId: string) => {
+  const toggleStudioLock = async (studioId: string) => {
+    const studioToLock = studios.find(s => s.id === studioId);
+    if (!studioToLock) return;
+
+    const isCurrentlyLocked = studioToLock.isLocked;
+
+    // Optimistic update
     setStudios((prevStudios) =>
       prevStudios.map((studio) =>
-        studio.id === studioId ? { ...studio, isLocked: !studio.isLocked } : studio,
+        studio.id === studioId ? { ...studio, isLocked: !isCurrentlyLocked } : studio,
       ),
     );
+
+    try {
+      if (isCurrentlyLocked) {
+        await unlockStudio({ studioNumber: studioToLock.studioNumber }).unwrap();
+      } else {
+        await lockStudio({ studioNumber: studioToLock.studioNumber }).unwrap();
+      }
+    } catch (err) {
+      // Revert on error
+      setStudios((prevStudios) =>
+        prevStudios.map((studio) =>
+          studio.id === studioId ? { ...studio, isLocked: isCurrentlyLocked } : studio,
+        ),
+      );
+      console.error("Failed to update studio lock:", err);
+    }
   };
 
-  const toggleOverride = (studioId: string) => {
+  const toggleOverride = async (studioId: string) => {
+    const studioToOverride = studios.find(s => s.id === studioId);
+    if (!studioToOverride) return;
+
+    const isCurrentlyOverridden = studioToOverride.allowManualOverride;
+
+    // Optimistic update
     setStudios((prevStudios) =>
       prevStudios.map((studio) =>
         studio.id === studioId
-          ? { ...studio, allowManualOverride: !studio.allowManualOverride }
+          ? { ...studio, allowManualOverride: !isCurrentlyOverridden }
           : studio,
       ),
     );
+
+    try {
+      await toggleManualOverride({
+        studioNumber: studioToOverride.studioNumber,
+        enabled: !isCurrentlyOverridden
+      }).unwrap();
+    } catch (err) {
+      // Revert on error
+      setStudios((prevStudios) =>
+        prevStudios.map((studio) =>
+          studio.id === studioId
+            ? { ...studio, allowManualOverride: isCurrentlyOverridden }
+            : studio,
+        ),
+      );
+      console.error("Failed to toggle manual override:", err);
+    }
   };
+
+  const filteredStudios = studios.filter((studio) =>
+    studio.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    studio.stations.some((s) => s.name.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
 
   return (
     <div className="space-y-6 max-w-8xl mx-auto">
@@ -163,186 +237,214 @@ export default function StudioManagementPage() {
         <input
           type="text"
           placeholder="Search by the Studio name or game"
-          className="w-full bg-bg-card border-border py-3 md:py-3.5 pl-12 pr-4 text-zinc-300 focus:outline-none focus:border-brand-secondary focus:ring-1 focus:ring-brand-secondary transition-all placeholder:text-zinc-600 text-sm sm:text-base"
+          className="w-full bg-bg-card border border-border py-3 md:py-3.5 pl-12 pr-4 text-zinc-300 focus:outline-none focus:border-brand-secondary focus:ring-1 focus:ring-brand-secondary transition-all placeholder:text-zinc-600 text-sm sm:text-base rounded-2xl"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {studios.map((studio) => (
-          <div
-            key={studio.id}
-            className="bg-bg-card border-border p-6 md:p-8 flex flex-col h-full transition-all"
-          >
-            {/* Studio Header */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 md:mb-8 gap-4">
-              <div className="flex items-center gap-3 md:gap-4">
-                <div className="p-2.5 md:p-3 bg-pink-500 rounded-xl shadow-lg shadow-pink-500/20">
-                  <Unlock className="w-5 h-5 md:w-6 md:h-6 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-lg sm:text-xl font-bold text-white leading-tight">
-                    {studio.name}
-                  </h2>
-                  <span className="text-[10px] sm:text-xs uppercase font-bold tracking-wider text-brand-success ">
-                    {studio.isLocked ? "Locked" : "Unlocked"}
-                  </span>
-                </div>
-              </div>
-              <button
-                onClick={() => toggleStudioLock(studio.id)}
-                className="w-full cursor-pointer sm:w-auto flex items-center justify-center gap-2 px-4 py-2 border border-brand-success/30 rounded-xl text-brand-success text-[10px] sm:text-xs font-bold hover:bg-brand-success/10 transition-colors uppercase tracking-wider"
-              >
-                <Lock className="w-3 md:w-3.5 h-3 md:h-3.5" />
-                {studio.isLocked ? "Unlock Studio" : "Lock Studio"}
-              </button>
+        {isLoading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <StudioManagementSkeleton key={i} />
+          ))
+        ) : isError ? (
+          <div className="col-span-full flex flex-col items-center justify-center py-20 bg-bg-card border border-border rounded-3xl space-y-4">
+            <AlertTriangle className="w-12 h-12 text-brand-error opacity-50" />
+            <div className="text-center">
+              <h3 className="text-white font-bold text-lg">Failed to load studios</h3>
+              <p className="text-zinc-500 text-sm mt-1">There was an error fetching the studio data.</p>
             </div>
-
-            {/* Stations Section */}
-            <div className="flex-1 space-y-6">
-              <h3 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.15em] mb-4">
-                Stations
-              </h3>
-              <div className="space-y-4">
-                {studio.stations.map((station) => (
-                  <div
-                    key={station.id}
-                    className={cn(
-                      "bg-[#1e293b]/40 border rounded-2xl p-4 transition-all duration-300",
-                      station.status === "Defective"
-                        ? "border-red-900/50"
-                        : "border-zinc-800",
-                    )}
-                  >
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={cn(
-                            "p-2 rounded-lg",
-                            station.status === "Defective"
-                              ? "bg-brand-error/20"
-                              : "bg-brand-success/20",
-                          )}
-                        >
-                          {station.status === "Defective" ? (
-                            <AlertTriangle className="w-4 h-4 md:w-5 md:h-5 text-brand-error" />
-                          ) : (
-                            <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-brand-success" />
-                          )}
-                        </div>
-                        <div>
-                          <h4 className="text-white font-bold text-sm sm:text-base">
-                            {station.name}
-                          </h4>
-                          <span
-                            className={cn(
-                              "text-[10px] sm:text-xs uppercase font-bold px-2 py-0.5 rounded tracking-wider",
-                              station.status === "Active"
-                                ? "bg-brand-success/40 text-brand-success"
-                                : station.status === "Defective"
-                                  ? "bg-brand-error/40 text-brand-error"
-                                  : "bg-zinc-800 text-zinc-500",
-                            )}
-                          >
-                            {station.status}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {station.warning && (
-                      <div className="bg-brand-error/20 border border-brand-error/30 rounded-lg p-3 mb-4 flex items-center gap-2">
-                        <AlertTriangle className="w-4 h-4 text-brand-error shrink-0" />
-                        <span className="text-brand-error text-[10px] sm:text-xs font-bold uppercase tracking-wider">
-                          {station.warning}
-                        </span>
-                      </div>
-                    )}
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-                      <button
-                        onClick={() =>
-                          toggleStationStatus(studio.id, station.id, "Active")
-                        }
-                        className={cn(
-                          "flex cursor-pointer items-center justify-center gap-1.5 py-2 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all",
-                          station.status === "Active"
-                            ? "bg-brand-success/20 text-brand-success border border-brand-success/50 cursor-default"
-                            : "text-zinc-500 border border-zinc-800 hover:bg-zinc-800",
-                        )}
-                      >
-                        <Play
-                          className={cn(
-                            "w-3.5 h-3.5",
-                            station.status === "Active" && "fill-brand-success",
-                          )}
-                        />
-                        Activate
-                      </button>
-                      <button
-                        onClick={() =>
-                          toggleStationStatus(studio.id, station.id, "Inactive")
-                        }
-                        className={cn(
-                          "flex cursor-pointer items-center justify-center gap-1.5 py-2 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all",
-                          station.status === "Inactive"
-                            ? "bg-zinc-800 text-white border border-zinc-700"
-                            : "text-zinc-500 border border-zinc-800 hover:bg-zinc-800",
-                        )}
-                      >
-                        <Square
-                          className={cn(
-                            "w-3.5 h-3.5",
-                            station.status === "Inactive" && "fill-white",
-                          )}
-                        />
-                        Deactivate
-                      </button>
-                      <button
-                        onClick={() => handleMarkDefectClick(studio.id, station)}
-                        className={cn(
-                          "sm:col-span-2 md:col-span-1 flex cursor-pointer items-center justify-center gap-1.5 py-2 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all text-nowrap",
-                          station.status === "Defective"
-                            ? "bg-brand-error/20 text-brand-error border border-brand-error/50"
-                            : "text-zinc-500 border border-zinc-800 hover:bg-brand-error/10 hover:text-brand-error hover:border-brand-error/30",
-                        )}
-                      >
-                        <Wrench className="w-3.5 h-3.5" />
-                        Mark Defect
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Manual Override Toggle */}
-            <div className="mt-8 pt-6 border-t border-zinc-800 flex items-center justify-between">
-              <span className="text-zinc-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
-                Allow Manual Override
-              </span>
-              <button
-                onClick={() => toggleOverride(studio.id)}
-                className={cn(
-                  "relative inline-flex h-5 w-10 md:h-6 md:w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
-                  studio.allowManualOverride
-                    ? "bg-brand-secondary"
-                    : "bg-zinc-700",
-                )}
-              >
-                <span
-                  className={cn(
-                    "pointer-events-none inline-block h-4 w-4 md:h-5 md:w-5 transform rounded-full bg-black shadow ring-0 transition duration-200 ease-in-out",
-                    studio.allowManualOverride
-                      ? "translate-x-5"
-                      : "translate-x-0",
-                  )}
-                />
-              </button>
+            <button
+              onClick={() => refetch()}
+              className="px-6 py-2 bg-brand-secondary text-black font-bold rounded-xl hover:bg-brand-secondary/90 transition-colors cursor-pointer"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : filteredStudios.length === 0 ? (
+          <div className="col-span-full flex flex-col items-center justify-center py-20 bg-bg-card border border-border rounded-3xl space-y-4">
+            <Search className="w-12 h-12 text-zinc-500 opacity-50" />
+            <div className="text-center">
+              <h3 className="text-white font-bold text-lg">No studios found</h3>
+              <p className="text-zinc-500 text-sm mt-1">Try adjusting your search query "{searchQuery}".</p>
             </div>
           </div>
-        ))}
+        ) : (
+          filteredStudios.map((studio) => (
+            <div
+              key={studio.id}
+              className="bg-bg-card border-border p-6 md:p-8 flex flex-col h-full transition-all"
+            >
+              {/* Studio Header */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 md:mb-8 gap-4">
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div className="p-2.5 md:p-3 bg-pink-500 rounded-xl shadow-lg shadow-pink-500/20">
+                    <Unlock className="w-5 h-5 md:w-6 md:h-6 text-white" />
+                  </div>
+                  <div>
+                    <h2 className="text-lg sm:text-xl font-bold text-white leading-tight">
+                      {studio.name}
+                    </h2>
+                    <span className="text-[10px] sm:text-xs uppercase font-bold tracking-wider text-brand-success ">
+                      {studio.isLocked ? "Locked" : "Unlocked"}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={() => toggleStudioLock(studio.id)}
+                  className="w-full cursor-pointer sm:w-auto flex items-center justify-center gap-2 px-4 py-2 border border-brand-success/30 rounded-xl text-brand-success text-[10px] sm:text-xs font-bold hover:bg-brand-success/10 transition-colors uppercase tracking-wider"
+                >
+                  <Lock className="w-3 md:w-3.5 h-3 md:h-3.5" />
+                  {studio.isLocked ? "Unlock Studio" : "Lock Studio"}
+                </button>
+              </div>
+
+              {/* Stations Section */}
+              <div className="flex-1 space-y-6">
+                <h3 className="text-zinc-500 text-xs font-bold uppercase tracking-[0.15em] mb-4">
+                  Stations
+                </h3>
+                <div className="space-y-4">
+                  {studio.stations.map((station) => (
+                    <div
+                      key={station.id}
+                      className={cn(
+                        "bg-[#1e293b]/40 border rounded-2xl p-4 transition-all duration-300",
+                        station.status === "Defective"
+                          ? "border-red-900/50"
+                          : "border-zinc-800",
+                      )}
+                    >
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={cn(
+                              "p-2 rounded-lg",
+                              station.status === "Defective"
+                                ? "bg-brand-error/20"
+                                : "bg-brand-success/20",
+                            )}
+                          >
+                            {station.status === "Defective" ? (
+                              <AlertTriangle className="w-4 h-4 md:w-5 md:h-5 text-brand-error" />
+                            ) : (
+                              <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-brand-success" />
+                            )}
+                          </div>
+                          <div>
+                            <h4 className="text-white font-bold text-sm sm:text-base">
+                              {station.name}
+                            </h4>
+                            <span
+                              className={cn(
+                                "text-[10px] sm:text-xs uppercase font-bold px-2 py-0.5 rounded tracking-wider",
+                                station.status === "Active"
+                                  ? "bg-brand-success/40 text-brand-success"
+                                  : station.status === "Defective"
+                                    ? "bg-brand-error/40 text-brand-error"
+                                    : "bg-zinc-800 text-zinc-500",
+                              )}
+                            >
+                              {station.status}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {station.warning && (
+                        <div className="bg-brand-error/20 border border-brand-error/30 rounded-lg p-3 mb-4 flex items-center gap-2">
+                          <AlertTriangle className="w-4 h-4 text-brand-error shrink-0" />
+                          <span className="text-brand-error text-[10px] sm:text-xs font-bold uppercase tracking-wider">
+                            {station.warning}
+                          </span>
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                        <button
+                          onClick={() =>
+                            toggleStationStatus(studio.id, station.id, "Active")
+                          }
+                          className={cn(
+                            "flex cursor-pointer items-center justify-center gap-1.5 py-2 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all",
+                            station.status === "Active"
+                              ? "bg-brand-success/20 text-brand-success border border-brand-success/50 cursor-default"
+                              : "text-zinc-500 border border-zinc-800 hover:bg-zinc-800",
+                          )}
+                        >
+                          <Play
+                            className={cn(
+                              "w-3.5 h-3.5",
+                              station.status === "Active" && "fill-brand-success",
+                            )}
+                          />
+                          Activate
+                        </button>
+                        <button
+                          onClick={() =>
+                            toggleStationStatus(studio.id, station.id, "Inactive")
+                          }
+                          className={cn(
+                            "flex cursor-pointer items-center justify-center gap-1.5 py-2 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all",
+                            station.status === "Inactive"
+                              ? "bg-zinc-800 text-white border border-zinc-700"
+                              : "text-zinc-500 border border-zinc-800 hover:bg-zinc-800",
+                          )}
+                        >
+                          <Square
+                            className={cn(
+                              "w-3.5 h-3.5",
+                              station.status === "Inactive" && "fill-white",
+                            )}
+                          />
+                          Deactivate
+                        </button>
+                        <button
+                          onClick={() => handleMarkDefectClick(studio.id, station)}
+                          className={cn(
+                            "sm:col-span-2 md:col-span-1 flex cursor-pointer items-center justify-center gap-1.5 py-2 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all text-nowrap",
+                            station.status === "Defective"
+                              ? "bg-brand-error/20 text-brand-error border border-brand-error/50"
+                              : "text-zinc-500 border border-zinc-800 hover:bg-brand-error/10 hover:text-brand-error hover:border-brand-error/30",
+                          )}
+                        >
+                          <Wrench className="w-3.5 h-3.5" />
+                          Mark Defect
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Manual Override Toggle */}
+              <div className="mt-8 pt-6 border-t border-zinc-800 flex items-center justify-between">
+                <span className="text-zinc-400 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
+                  Allow Manual Override
+                </span>
+                <button
+                  onClick={() => toggleOverride(studio.id)}
+                  className={cn(
+                    "relative inline-flex h-5 w-10 md:h-6 md:w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none",
+                    studio.allowManualOverride
+                      ? "bg-brand-secondary"
+                      : "bg-zinc-700",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "pointer-events-none inline-block h-4 w-4 md:h-5 md:w-5 transform rounded-full bg-black shadow ring-0 transition duration-200 ease-in-out",
+                      studio.allowManualOverride
+                        ? "translate-x-5"
+                        : "translate-x-0",
+                    )}
+                  />
+                </button>
+              </div>
+            </div>
+          ))
+        )}
       </div>
 
       {/* See All Studios Button */}
