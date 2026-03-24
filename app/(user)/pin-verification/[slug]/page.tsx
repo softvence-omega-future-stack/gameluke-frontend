@@ -85,7 +85,7 @@ export default function PinVerificationPage() {
                                 type="text"
                                 placeholder="E.G. ABC123"
                                 value={pin}
-                                onChange={(e) => setPin(e.target.value.toUpperCase())}
+                                onChange={(e) => setPin(e.target.value)}
                                 className="w-full bg-white/5 border-2 border-white/10 py-5 px-6 text-2xl font-black tracking-[0.4em] text-center text-[#FFFF00] placeholder:text-gray-700 placeholder:tracking-normal focus:outline-none focus:border-[#FFFF00]/50 transition-all rounded-2xl uppercase ring-offset-black focus:ring-2 focus:ring-[#FFFF00]/20"
                                 maxLength={10}
                                 required
@@ -112,7 +112,7 @@ export default function PinVerificationPage() {
                                     </>
                                 )}
                             </button>
-                            
+
                             <button
                                 type="button"
                                 onClick={() => router.back()}
