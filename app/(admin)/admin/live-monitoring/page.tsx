@@ -1,4 +1,5 @@
 "use client";
+import { useTimer } from "@/hooks/useTimer";
 
 import {
     MapPin,
@@ -55,6 +56,7 @@ const StudioSkeleton = () => (
 );
 
 export default function LiveMonitoringPage() {
+    const { formattedTime } = useTimer();
     const [isCreateGroupModalOpen, setIsCreateGroupModalOpen] = useState(false);
     const [groupName, setGroupName] = useState("");
     const [maxPlayers, setMaxPlayers] = useState<string>("12");
@@ -240,18 +242,21 @@ export default function LiveMonitoringPage() {
                                     </div>
                                     <div className="text-left xs:text-right">
                                         <p className="text-zinc-500 text-[10px] sm:text-xs font-bold uppercase tracking-wider">Time Left</p>
-                                        <p className="text-white text-lg sm:text-xl font-bold">{"--"}</p>
+                                        <p className="text-white text-lg sm:text-xl font-bold">{studio.status === "OCCUPIED" ? formattedTime : "--"}</p>
                                     </div>
                                 </div>
 
-                                {/* Group Info Box */}
                                 <div className="bg-bg-deep border border-zinc-800 rounded-xl sm:rounded-2xl p-4 sm:p-5 flex items-center justify-between gap-4">
                                     <div className="space-y-1 min-w-0">
                                         <p className="text-zinc-500 text-[10px] sm:text-xs font-bold uppercase tracking-wider">Current Group</p>
-                                        <p className="text-white font-bold truncate text-sm sm:text-base">{"N/A"}</p>
+                                        <p className="text-white font-bold truncate text-sm sm:text-base">
+                                            {studio.assignments && studio.assignments.length > 0
+                                                ? studio.assignments[0]?.group?.name || "N/A"
+                                                : "N/A"}
+                                        </p>
                                         <p className="text-zinc-600 text-xs sm:text-sm truncate">{studio.gameName}</p>
                                     </div>
-                                    {studio.status === "OCCUPIED" && (
+                                    {/* {studio.status === "OCCUPIED" && (
                                         <div
                                             onClick={() => togglePause(studio.id)}
                                             className="bg-brand-secondary p-1.5 sm:p-2 rounded-md cursor-pointer hover:bg-brand-secondary/90 shrink-0 transition-colors"
@@ -262,7 +267,7 @@ export default function LiveMonitoringPage() {
                                                 : <Pause className="w-3.5 h-3.5 sm:w-4 h-4 text-black" fill="black" />
                                             }
                                         </div>
-                                    )}
+                                    )} */}
                                 </div>
 
                                 {/* Stations List */}

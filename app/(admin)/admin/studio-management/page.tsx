@@ -11,14 +11,18 @@ import {
   Square,
   Wrench,
   X,
+  ImagePlus,
+  Upload,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import Image from "next/image";
 
-import { useGetStudiosQuery, useLockStudioMutation, useUnlockStudioMutation, useToggleManualOverrideMutation } from "@/redux/api/admin/studiosApi";
+import { useGetStudiosQuery, useLockStudioMutation, useUnlockStudioMutation, useToggleManualOverrideMutation, useUpdateStationStatusMutation, useUploadStudioImageMutation } from "@/redux/api/admin/studiosApi";
 import { useEffect } from "react";
 
-type StationStatus = "Active" | "Inactive" | "Defective";
+type StationStatus = "Active" | "Inactive" | "Defective" | "Maintenance";
 
 interface Station {
   id: string;
@@ -33,9 +37,25 @@ interface Studio {
   studioNumber: number;
   name: string;
   isLocked: boolean;
+  status: string;
+  activeGroupName: string;
   stations: Station[];
   allowManualOverride: boolean;
 }
+
+const statusMap: Record<string, StationStatus> = {
+  ACTIVE: "Active",
+  INACTIVE: "Inactive",
+  DEFECTIVE: "Defective",
+  MAINTENANCE: "Maintenance",
+};
+
+const apiStatusMap: Record<StationStatus, "ACTIVE" | "INACTIVE" | "DEFECTIVE" | "MAINTENANCE"> = {
+  Active: "ACTIVE",
+  Inactive: "INACTIVE",
+  Defective: "DEFECTIVE",
+  Maintenance: "MAINTENANCE",
+};
 
 const StudioManagementSkeleton = () => (
   <div className="bg-bg-card border-border p-6 md:p-8 flex flex-col h-full animate-pulse">
@@ -70,6 +90,14 @@ export default function StudioManagementPage() {
   const [lockStudio] = useLockStudioMutation();
   const [unlockStudio] = useUnlockStudioMutation();
   const [toggleManualOverride] = useToggleManualOverrideMutation();
+  const [updateStationStatus] = useUpdateStationStatusMutation();
+  const [uploadStudioImage, { isLoading: isUploading }] = useUploadStudioImageMutation();
+
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [uploadingStudioId, setUploadingStudioId] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   useEffect(() => {
     if (studiosData?.data) {
@@ -77,12 +105,14 @@ export default function StudioManagementPage() {
         id: s.id.toString(),
         studioNumber: s.studioNumber,
         name: s.name,
+        status: s.status,
+        activeGroupName: s.assignments?.[0]?.groupName || "",
         isLocked: s.status === "MAINTENANCE" || s.status === "LOCKED",
         allowManualOverride: s.manualOverride,
         stations: s.stations.map(st => ({
           id: st.id,
           name: `Station ${st.name}`,
-          status: st.status === "ACTIVE" ? "Active" : st.status === "DEFECTIVE" ? "Defective" : "Inactive",
+          status: statusMap[st.status] || "Inactive",
           warning: st.defectReason || undefined,
         }))
       }));
@@ -97,12 +127,22 @@ export default function StudioManagementPage() {
   } | null>(null);
   const [defectNotes, setDefectNotes] = useState("");
 
-  const toggleStationStatus = (
+  const toggleStationStatus = async (
     studioId: string,
     stationId: string,
     newStatus: StationStatus,
     notes?: string,
   ) => {
+    const studio = studios.find(s => s.id === studioId);
+    if (!studio) return;
+    const station = studio.stations.find(s => s.id === stationId);
+    if (!station) return;
+
+    const oldStatus = station.status;
+    const oldWarning = station.warning;
+    const oldDefectNotes = station.defectNotes;
+
+    // Optimistic update
     setStudios((prevStudios) =>
       prevStudios.map((studio) => {
         if (studio.id !== studioId) return studio;
@@ -113,20 +153,43 @@ export default function StudioManagementPage() {
               ? {
                 ...station,
                 status: newStatus,
-                warning:
-                  newStatus === "Defective"
-                    ? notes || station.warning
-                    : undefined,
-                defectNotes:
-                  newStatus === "Defective"
-                    ? notes || station.defectNotes
-                    : undefined,
+                warning: newStatus === "Defective" ? notes || station.warning : undefined,
+                defectNotes: newStatus === "Defective" ? notes || station.defectNotes : undefined,
               }
               : station,
           ),
         };
       }),
     );
+
+    try {
+      await updateStationStatus({
+        stationId,
+        status: apiStatusMap[newStatus] as any,
+        defectReason: notes,
+      }).unwrap();
+    } catch (err) {
+      // Revert on error
+      setStudios((prevStudios) =>
+        prevStudios.map((studio) => {
+          if (studio.id !== studioId) return studio;
+          return {
+            ...studio,
+            stations: studio.stations.map((station) =>
+              station.id === stationId
+                ? {
+                  ...station,
+                  status: oldStatus,
+                  warning: oldWarning,
+                  defectNotes: oldDefectNotes,
+                }
+                : station,
+            ),
+          };
+        }),
+      );
+      console.error("Failed to update station status:", err);
+    }
   };
 
   const handleMarkDefectClick = (studioId: string, station: Station) => {
@@ -212,6 +275,45 @@ export default function StudioManagementPage() {
     }
   };
 
+  const openUploadModal = (studioId: string) => {
+    setUploadingStudioId(studioId);
+    setIsUploadModalOpen(true);
+    setUploadError(null);
+    setSelectedFile(null);
+    setPreviewUrl(null);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (!file.type.startsWith("image/")) {
+        setUploadError("Please select an image file.");
+        return;
+      }
+      setSelectedFile(file);
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+      setUploadError(null);
+    }
+  };
+
+  const handleUpload = async () => {
+    if (!uploadingStudioId || !selectedFile) return;
+
+    try {
+      await uploadStudioImage({
+        studioId: uploadingStudioId,
+        image: selectedFile,
+      }).unwrap();
+      setIsUploadModalOpen(false);
+      setUploadingStudioId(null);
+      setSelectedFile(null);
+      setPreviewUrl(null);
+    } catch (err: any) {
+      setUploadError(err?.data?.message || "Failed to upload image. Please try again.");
+    }
+  };
+
   const filteredStudios = studios.filter((studio) =>
     studio.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     studio.stations.some((s) => s.name.toLowerCase().includes(searchQuery.toLowerCase()))
@@ -286,18 +388,40 @@ export default function StudioManagementPage() {
                     <h2 className="text-lg sm:text-xl font-bold text-white leading-tight">
                       {studio.name}
                     </h2>
-                    <span className="text-[10px] sm:text-xs uppercase font-bold tracking-wider text-brand-success ">
-                      {studio.isLocked ? "Locked" : "Unlocked"}
-                    </span>
+                    <div className="flex flex-wrap items-center gap-2 mt-1">
+                      <span className={cn(
+                        "text-[10px] sm:text-xs uppercase font-bold tracking-wider",
+                        studio.status === "OCCUPIED" ? "text-brand-secondary" : "text-brand-success"
+                      )}>
+                        {studio.isLocked ? "Locked" : studio.status === "OCCUPIED" ? "Occupied" : "Available"}
+                      </span>
+                      {studio.status === "OCCUPIED" && studio.activeGroupName && (
+                        <>
+                          <span className="w-1 h-1 rounded-full bg-zinc-700" />
+                          <span className="text-[10px] sm:text-xs font-bold text-zinc-400">
+                            Current: <span className="text-brand-secondary">{studio.activeGroupName}</span>
+                          </span>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <button
-                  onClick={() => toggleStudioLock(studio.id)}
-                  className="w-full cursor-pointer sm:w-auto flex items-center justify-center gap-2 px-4 py-2 border border-brand-success/30 rounded-xl text-brand-success text-[10px] sm:text-xs font-bold hover:bg-brand-success/10 transition-colors uppercase tracking-wider"
-                >
-                  <Lock className="w-3 md:w-3.5 h-3 md:h-3.5" />
-                  {studio.isLocked ? "Unlock Studio" : "Lock Studio"}
-                </button>
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                  <button
+                    onClick={() => openUploadModal(studio.id)}
+                    className="flex-1 cursor-pointer sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-brand-secondary/10 border border-brand-secondary/30 rounded-xl text-brand-secondary text-[10px] sm:text-xs font-bold hover:bg-brand-secondary/20 transition-colors uppercase tracking-wider"
+                  >
+                    <ImagePlus className="w-3 md:w-3.5 h-3 md:h-3.5" />
+                    Upload Image
+                  </button>
+                  <button
+                    onClick={() => toggleStudioLock(studio.id)}
+                    className="flex-1 cursor-pointer sm:flex-none flex items-center justify-center gap-2 px-4 py-2 border border-brand-success/30 rounded-xl text-brand-success text-[10px] sm:text-xs font-bold hover:bg-brand-success/10 transition-colors uppercase tracking-wider"
+                  >
+                    <Lock className="w-3 md:w-3.5 h-3 md:h-3.5" />
+                    {studio.isLocked ? "Unlock Studio" : "Lock Studio"}
+                  </button>
+                </div>
               </div>
 
               {/* Stations Section */}
@@ -328,6 +452,8 @@ export default function StudioManagementPage() {
                           >
                             {station.status === "Defective" ? (
                               <AlertTriangle className="w-4 h-4 md:w-5 md:h-5 text-brand-error" />
+                            ) : station.status === "Maintenance" ? (
+                              <Wrench className="w-4 h-4 md:w-5 md:h-5 text-brand-warning" />
                             ) : (
                               <CheckCircle2 className="w-4 h-4 md:w-5 md:h-5 text-brand-success" />
                             )}
@@ -343,7 +469,9 @@ export default function StudioManagementPage() {
                                   ? "bg-brand-success/40 text-brand-success"
                                   : station.status === "Defective"
                                     ? "bg-brand-error/40 text-brand-error"
-                                    : "bg-zinc-800 text-zinc-500",
+                                    : station.status === "Maintenance"
+                                      ? "bg-brand-warning/40 text-brand-warning"
+                                      : "bg-zinc-800 text-zinc-500",
                               )}
                             >
                               {station.status}
@@ -361,7 +489,7 @@ export default function StudioManagementPage() {
                         </div>
                       )}
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <button
                           onClick={() =>
                             toggleStationStatus(studio.id, station.id, "Active")
@@ -382,35 +510,30 @@ export default function StudioManagementPage() {
                           Activate
                         </button>
                         <button
-                          onClick={() =>
-                            toggleStationStatus(studio.id, station.id, "Inactive")
-                          }
-                          className={cn(
-                            "flex cursor-pointer items-center justify-center gap-1.5 py-2 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all",
-                            station.status === "Inactive"
-                              ? "bg-zinc-800 text-white border border-zinc-700"
-                              : "text-zinc-500 border border-zinc-800 hover:bg-zinc-800",
-                          )}
-                        >
-                          <Square
-                            className={cn(
-                              "w-3.5 h-3.5",
-                              station.status === "Inactive" && "fill-white",
-                            )}
-                          />
-                          Deactivate
-                        </button>
-                        <button
                           onClick={() => handleMarkDefectClick(studio.id, station)}
                           className={cn(
-                            "sm:col-span-2 md:col-span-1 flex cursor-pointer items-center justify-center gap-1.5 py-2 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all text-nowrap",
+                            "flex cursor-pointer items-center justify-center gap-1.5 py-2 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all text-nowrap",
                             station.status === "Defective"
                               ? "bg-brand-error/20 text-brand-error border border-brand-error/50"
                               : "text-zinc-500 border border-zinc-800 hover:bg-brand-error/10 hover:text-brand-error hover:border-brand-error/30",
                           )}
                         >
-                          <Wrench className="w-3.5 h-3.5" />
+                          <AlertTriangle className="w-3.5 h-3.5" />
                           Mark Defect
+                        </button>
+                        <button
+                          onClick={() =>
+                            toggleStationStatus(studio.id, station.id, "Maintenance")
+                          }
+                          className={cn(
+                            "flex cursor-pointer items-center justify-center gap-1.5 py-2 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider transition-all text-nowrap",
+                            station.status === "Maintenance"
+                              ? "bg-brand-warning/20 text-brand-warning border border-brand-warning/50"
+                              : "text-zinc-500 border border-zinc-800 hover:bg-brand-warning/10 hover:text-brand-warning hover:border-brand-warning/30",
+                          )}
+                        >
+                          <Wrench className="w-3.5 h-3.5" />
+                          Maintenance
                         </button>
                       </div>
                     </div>
@@ -519,6 +642,116 @@ export default function StudioManagementPage() {
                   className="py-4 px-6 bg-brand-secondary text-black font-bold rounded-2xl hover:bg-brand-secondary/90 transition-colors shadow-lg shadow-brand-secondary/20 cursor-pointer"
                 >
                   Confirm Defect
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Upload Image Modal */}
+      {isUploadModalOpen && uploadingStudioId && (
+        <div className="fixed inset-0 z-200 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            onClick={() => setIsUploadModalOpen(false)}
+          />
+          <div
+            className="relative w-full max-w-md border-border-2 rounded-3xl p-6 md:p-8 animate-in zoom-in-95 duration-200"
+            style={{ backgroundColor: "#0f172a", opacity: 1 }}
+          >
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight">
+                Upload Studio Image
+              </h2>
+              <button
+                onClick={() => setIsUploadModalOpen(false)}
+                className="text-zinc-500 hover:text-white transition-colors p-2 hover:bg-white/5 rounded-full"
+              >
+                <X size={24} />
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              <div className="bg-[#1e293b] border-border rounded-2xl p-5 text-center">
+                <p className="text-zinc-500 text-xs font-bold uppercase tracking-widest mb-1">
+                  Studio
+                </p>
+                <p className="text-white text-base sm:text-lg font-bold">
+                  {studios.find((r) => r.id === uploadingStudioId)?.name}
+                </p>
+              </div>
+
+              {/* Image Preview Area */}
+              <div className="relative group">
+                <div className={cn(
+                  "w-full aspect-video rounded-2xl border-2 border-dashed border-zinc-700 bg-zinc-900/50 flex flex-col items-center justify-center overflow-hidden transition-all",
+                  previewUrl ? "border-brand-secondary/50" : "hover:border-zinc-500"
+                )}>
+                  {previewUrl ? (
+                    <div className="relative w-full h-full">
+                      <Image
+                        src={previewUrl}
+                        alt="Preview"
+                        fill
+                        className="object-cover"
+                      />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <button
+                          onClick={() => {
+                            setPreviewUrl(null);
+                            setSelectedFile(null);
+                          }}
+                          className="p-2 bg-brand-error text-white rounded-full hover:bg-brand-error/90 transition-colors"
+                        >
+                          <X size={20} />
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <label className="w-full h-full flex flex-col items-center justify-center cursor-pointer p-4 group">
+                      <div className="w-12 h-12 bg-zinc-800 rounded-xl flex items-center justify-center mb-3 group-hover:bg-zinc-700 transition-colors">
+                        <Upload className="w-6 h-6 text-zinc-500 group-hover:text-zinc-300" />
+                      </div>
+                      <p className="text-sm font-bold text-zinc-500 group-hover:text-zinc-400">Click to select image</p>
+                      <p className="text-[10px] text-zinc-600 mt-1 uppercase tracking-widest">PNG, JPG or WEBP</p>
+                      <input
+                        type="file"
+                        className="hidden"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                      />
+                    </label>
+                  )}
+                </div>
+              </div>
+
+              {uploadError && (
+                <div className="bg-brand-error/10 border border-brand-error/30 rounded-xl p-3 flex items-center gap-2 text-brand-error text-xs font-bold uppercase tracking-wider">
+                  <AlertTriangle className="w-4 h-4 shrink-0" />
+                  {uploadError}
+                </div>
+              )}
+
+              <div className="grid grid-cols-2 gap-4 mt-8">
+                <button
+                  onClick={() => setIsUploadModalOpen(false)}
+                  className="py-4 px-6 bg-white text-black font-bold rounded-2xl hover:bg-zinc-200 transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleUpload}
+                  disabled={!selectedFile || isUploading}
+                  className="py-4 px-6 bg-brand-secondary text-black font-bold rounded-2xl hover:bg-brand-secondary/90 transition-colors shadow-lg shadow-brand-secondary/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isUploading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Uploading...
+                    </>
+                  ) : (
+                    "Upload Image"
+                  )}
                 </button>
               </div>
             </div>

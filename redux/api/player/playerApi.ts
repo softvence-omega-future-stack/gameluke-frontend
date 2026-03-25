@@ -38,6 +38,62 @@ interface GetAvailableGroupsResponse {
     data: Group[];
 }
 
+export interface TeamAssignment {
+    id: string;
+    groupId: string;
+    studioId: number;
+    config: {
+        teamSetup: string;
+        studioSize: number;
+    };
+    createdAt: string;
+    studio: {
+        id: number;
+        studioNumber: number;
+        name: string;
+        gameName: string;
+        childCompatible: boolean;
+        status: string;
+        createdAt: string;
+        sessionId: string | null;
+        manualOverride: boolean;
+        imageUrl: string;
+    };
+    subTeams: {
+        id: string;
+        name: string;
+        color: string | null;
+        score: number;
+        assignmentId: string;
+        createdAt: string;
+        updatedAt: string;
+        players: {
+            id: string;
+            subTeamId: string;
+            playerId: string;
+            player: {
+                id: string;
+                name: string;
+                email: string;
+                groupId: string;
+                pairUnitId: string | null;
+                gamesPlayed: number;
+                createdAt: string;
+                updatedAt: string;
+                registeredByAdmin: boolean;
+                ticketValidUntil: string | null;
+            };
+        }[];
+    }[];
+}
+
+interface GetTeamsResponse {
+    statusCode: number;
+    success: boolean;
+    message: string;
+    data: TeamAssignment[];
+}
+
 export const playerApi = baseApi.injectEndpoints({
     endpoints: (builder) => ({
         playerLogin: builder.mutation<PlayerLoginResponse, { name: string; email: string }>({
@@ -69,12 +125,28 @@ export const playerApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: ["Groups"],
         }),
+        getStudioDetails: builder.query<any, string | number>({
+            query: (id) => ({
+                url: `/players/studios/${id}`,
+                method: "GET",
+            }),
+            providesTags: (result, error, id) => [{ type: "Studios", id }],
+        }),
+        getTeams: builder.query<GetTeamsResponse, string>({
+            query: (groupId) => ({
+                url: `/players/teams/${groupId}`,
+                method: "GET",
+            }),
+            providesTags: (result, error, groupId) => [{ type: "Groups", id: groupId }],
+        }),
     }),
 });
 
-export const { 
-    usePlayerLoginMutation, 
-    useGetAvailableGroupsQuery, 
+export const {
+    usePlayerLoginMutation,
+    useGetAvailableGroupsQuery,
     useGetGroupDetailsQuery,
-    useJoinGroupMutation
+    useJoinGroupMutation,
+    useGetStudioDetailsQuery,
+    useGetTeamsQuery,
 } = playerApi;

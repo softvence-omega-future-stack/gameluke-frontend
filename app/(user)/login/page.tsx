@@ -17,7 +17,7 @@ function Loginpage() {
     const handleContinue = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
-        
+
         if (!formData.name || !formData.email) {
             setError("Please enter your name and email");
             return;
@@ -25,7 +25,7 @@ function Loginpage() {
 
         try {
             const response = await playerLogin(formData).unwrap();
-            
+
             if (response.success) {
                 localStorage.setItem("playerId", response.data.id);
                 localStorage.setItem("playerName", response.data.name);

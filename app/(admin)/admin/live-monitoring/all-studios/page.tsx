@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 
 import { useGetStudiosQuery } from "@/redux/api/admin/studiosApi";
+import { useTimer } from "@/hooks/useTimer";
 
 const StudioSkeleton = () => (
     <div className="bg-bg-dark border-border rounded-2xl p-4 sm:p-5 space-y-4 animate-pulse">
@@ -44,6 +45,7 @@ const StudioSkeleton = () => (
 );
 
 export default function AllStudiosPage() {
+    const { formattedTime } = useTimer();
     const [search, setSearch] = useState("");
     const [filter, setFilter] = useState<"All" | "OCCUPIED" | "AVAILABLE">("All");
 
@@ -197,7 +199,7 @@ export default function AllStudiosPage() {
                                         <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-wider flex items-center justify-end gap-1">
                                             <Clock className="w-3 h-3" /> Time Left
                                         </p>
-                                        <p className="text-white text-base font-bold">{"--"}</p>
+                                        <p className="text-white text-base font-bold">{studio.status === "OCCUPIED" ? formattedTime : "--"}</p>
                                     </div>
                                 </div>
 

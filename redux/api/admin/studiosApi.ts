@@ -4,11 +4,17 @@ export interface Station {
     id: string;
     studioId: number;
     name: string;
-    status: "ACTIVE" | "INACTIVE" | "DEFECTIVE";
+    status: "ACTIVE" | "INACTIVE" | "DEFECTIVE" | "MAINTENANCE";
     currentSubTeamId: string | null;
     createdAt: string;
     updatedAt: string;
     defectReason: string | null;
+}
+
+export interface UpdateStationStatusRequest {
+    stationId: string;
+    status: "ACTIVE" | "DEFECTIVE" | "MAINTENANCE";
+    defectReason?: string;
 }
 
 export interface Studio {
@@ -65,7 +71,34 @@ export const studiosApi = baseApi.injectEndpoints({
             }),
             invalidatesTags: ["Studios"],
         }),
+        updateStationStatus: builder.mutation<any, UpdateStationStatusRequest>({
+            query: (body) => ({
+                url: "/admin/stations/status",
+                method: "PATCH",
+                body,
+            }),
+            invalidatesTags: ["Studios"],
+        }),
+        uploadStudioImage: builder.mutation<any, { studioId: number | string; image: File }>({
+            query: ({ studioId, image }) => {
+                const formData = new FormData();
+                formData.append("image", image);
+                return {
+                    url: `/admin/studios/${studioId}/upload-image`,
+                    method: "PATCH",
+                    body: formData,
+                };
+            },
+            invalidatesTags: ["Studios"],
+        }),
     }),
 });
 
-export const { useGetStudiosQuery, useLockStudioMutation, useUnlockStudioMutation, useToggleManualOverrideMutation } = studiosApi;
+export const {
+    useGetStudiosQuery,
+    useLockStudioMutation,
+    useUnlockStudioMutation,
+    useToggleManualOverrideMutation,
+    useUpdateStationStatusMutation,
+    useUploadStudioImageMutation
+} = studiosApi;

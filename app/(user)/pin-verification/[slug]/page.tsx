@@ -35,7 +35,8 @@ export default function PinVerificationPage() {
         try {
             const response = await joinGroup({ pin, email }).unwrap();
             if (response.success) {
-                // Success! Redirect to confirm-team
+                // Success! Store group ID and redirect to confirm-team
+                localStorage.setItem("joinedGroupId", slug);
                 router.push("/confirm-team");
             }
         } catch (err: any) {

@@ -10,9 +10,19 @@ import {
     Info,
     AlertTriangle,
     RefreshCcw,
+    Layout,
+    X,
+    MapPin,
+    AlertCircle,
+    CheckCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useGetWaitlistQuery, WaitlistGroup } from "@/redux/api/admin/groupsApi";
+import { useGetWaitlistQuery, WaitlistGroup, useStartAllWaitlistMutation } from "@/redux/api/admin/groupsApi";
+import { useGetStudiosQuery, Studio } from "@/redux/api/admin/studiosApi";
+import { useAssignGroupMutation } from "@/redux/api/admin/godModeApi";
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { startTimer } from "@/redux/features/timerSlice";
 
 const WaitlistSkeleton = () => (
     <div className="space-y-4">
@@ -44,11 +54,183 @@ const StatSkeleton = () => (
     </div>
 );
 
+const StudioItemSkeleton = () => (
+    <div className="bg-zinc-900/50 border border-zinc-800 p-4 rounded-xl flex items-center justify-between animate-pulse">
+        <div className="flex items-center gap-4">
+            <div className="w-10 h-10 bg-zinc-800 rounded-lg" />
+            <div className="space-y-2">
+                <div className="h-4 w-32 bg-zinc-800 rounded" />
+                <div className="h-3 w-24 bg-zinc-800 rounded" />
+            </div>
+        </div>
+        <div className="h-8 w-20 bg-zinc-800 rounded-lg" />
+    </div>
+);
+
+interface StudioAssignmentModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    group: WaitlistGroup | null;
+}
+
+const StudioAssignmentModal = ({ isOpen, onClose, group }: StudioAssignmentModalProps) => {
+    const { data: studiosData, isLoading, isError, refetch } = useGetStudiosQuery();
+    const [assignGroup, { isLoading: isAssigning }] = useAssignGroupMutation();
+    const [assignError, setAssignError] = useState<string | null>(null);
+
+    const studios = studiosData?.data || [];
+
+    const handleAssign = async (studioNumber: number) => {
+        if (!group) return;
+        setAssignError(null);
+
+        try {
+            const result = await assignGroup({
+                groupId: group.id,
+                studioNumber: studioNumber
+            }).unwrap();
+
+            if (result.success) {
+                onClose();
+            }
+        } catch (err: any) {
+            setAssignError(err?.data?.message || "Failed to assign group. Please try again.");
+        }
+    };
+
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={onClose} />
+            <div className="relative w-full max-w-2xl bg-[#0a0a0a] border border-zinc-800 rounded-[2rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+                {/* Modal Header */}
+                <div className="p-6 border-b border-zinc-800 flex items-center justify-between bg-zinc-900/30">
+                    <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-brand-secondary/10 rounded-2xl flex items-center justify-center border border-brand-secondary/20">
+                            <Layout className="text-brand-secondary w-6 h-6" />
+                        </div>
+                        <div>
+                            <h2 className="text-xl font-bold text-white tracking-tight">Assign Studio</h2>
+                            <p className="text-zinc-500 text-xs font-medium uppercase tracking-widest mt-0.5">
+                                Select target for <span className="text-brand-secondary">{group?.name}</span>
+                            </p>
+                        </div>
+                    </div>
+                    <button onClick={onClose} className="p-2 hover:bg-zinc-800 rounded-xl transition-colors text-zinc-500 hover:text-white">
+                        <X className="w-6 h-6" />
+                    </button>
+                </div>
+
+                {/* Modal Body */}
+                <div className="p-6 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                    {assignError && (
+                        <div className="mb-4 bg-brand-error/10 border border-brand-error/20 p-4 rounded-xl flex items-center gap-3">
+                            <AlertCircle className="text-brand-error w-5 h-5 shrink-0" />
+                            <p className="text-brand-error text-sm font-bold">{assignError}</p>
+                        </div>
+                    )}
+
+                    {isLoading ? (
+                        <div className="space-y-3">
+                            {[1, 2, 3, 4].map(i => <StudioItemSkeleton key={i} />)}
+                        </div>
+                    ) : isError ? (
+                        <div className="py-12 flex flex-col items-center text-center gap-4">
+                            <AlertCircle className="text-brand-error w-12 h-12 opacity-50" />
+                            <div>
+                                <h4 className="text-white font-bold">Failed to load studios</h4>
+                                <button onClick={() => refetch()} className="text-brand-secondary text-sm font-bold mt-2 hover:underline">Retry Connection</button>
+                            </div>
+                        </div>
+                    ) : studios.length === 0 ? (
+                        <div className="py-12 flex flex-col items-center text-center gap-4 text-zinc-600">
+                            <Layout className="w-12 h-12 opacity-20" />
+                            <p className="font-bold uppercase tracking-widest text-xs">No Studios Configured</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-3">
+                            {studios.map((studio) => (
+                                <div
+                                    key={studio.id}
+                                    className={cn(
+                                        "group border p-4 rounded-2xl flex items-center justify-between transition-all duration-300",
+                                        studio.status === "AVAILABLE"
+                                            ? "bg-zinc-900/50 border-zinc-800 hover:border-brand-secondary/50 hover:bg-brand-secondary/[0.02]"
+                                            : "bg-zinc-900/20 border-zinc-900 opacity-60 grayscale cursor-not-allowed"
+                                    )}
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div className={cn(
+                                            "w-12 h-12 rounded-xl flex items-center justify-center border transition-colors",
+                                            studio.status === "AVAILABLE" ? "bg-zinc-800 border-zinc-700 group-hover:bg-brand-secondary/20 group-hover:border-brand-secondary/30" : "bg-zinc-900 border-zinc-800"
+                                        )}>
+                                            <MapPin className={cn(
+                                                "w-5 h-5",
+                                                studio.status === "AVAILABLE" ? "text-brand-secondary" : "text-zinc-700"
+                                            )} />
+                                        </div>
+                                        <div>
+                                            <h4 className="text-white font-bold text-sm sm:text-base">{studio.name}</h4>
+                                            <p className="text-zinc-500 text-xs">{studio.gameName}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-4">
+                                        <span className={cn(
+                                            "text-[10px] font-black uppercase tracking-tighter px-2 py-1 rounded-md border",
+                                            studio.status === "AVAILABLE"
+                                                ? "bg-brand-success/10 text-brand-success border-brand-success/20"
+                                                : "bg-brand-error/10 text-brand-error border-brand-error/20"
+                                        )}>
+                                            {studio.status}
+                                        </span>
+                                        {studio.status === "AVAILABLE" && (
+                                            <button
+                                                onClick={() => handleAssign(studio.studioNumber)}
+                                                disabled={isAssigning}
+                                                className="bg-brand-secondary text-black px-4 py-2 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-brand-secondary/90 transition-all hover:scale-105 active:scale-95 shadow-lg shadow-brand-secondary/10 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                            >
+                                                {isAssigning ? "Assigning..." : "Assign"}
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+
+                {/* Modal Footer */}
+                <div className="p-6 bg-zinc-900/30 border-t border-zinc-800 flex justify-end">
+                    <button onClick={onClose} className="px-6 py-3 bg-zinc-800 text-white rounded-2xl font-bold hover:bg-zinc-700 transition-all">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 export default function WaitlistPage() {
+    const dispatch = useDispatch();
     const { data: waitlistData, isLoading, isError, refetch } = useGetWaitlistQuery();
+    const [startAll, { isLoading: isStartingAll }] = useStartAllWaitlistMutation();
+    const [selectedGroup, setSelectedGroup] = useState<WaitlistGroup | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
     const waitlist = waitlistData?.data || [];
 
-    const totalPlayers = waitlist.reduce((acc, group) => acc + group.totalPlayers, 0);
+    const handleStartAll = async () => {
+        try {
+            await startAll().unwrap();
+            dispatch(startTimer(12));
+        } catch (err) {
+            console.error("Failed to start all:", err);
+        }
+    };
+
+    const totalPlayers = waitlist.reduce((acc: number, group: WaitlistGroup) => acc + group.totalPlayers, 0);
 
     const formatWaitTime = (createdAt: string) => {
         const now = new Date();
@@ -95,6 +277,16 @@ export default function WaitlistPage() {
                     <h1 className="text-xl sm:text-2xl font-bold text-brand-secondary text-nowrap">Waitlist Management</h1>
                     <p className="text-brand-success mt-1 text-sm tracking-wider">Manage group queue and priority settings</p>
                 </div>
+                {waitlist.length > 0 && (
+                    <button
+                        onClick={handleStartAll}
+                        disabled={isStartingAll}
+                        className="w-full sm:w-auto bg-[#fff200] text-black px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-[#e6d800] transition-all hover:scale-105 active:scale-95 shadow-lg shadow-[#fff200]/10 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                        <Play className="w-4 h-4 fill-black" strokeWidth={3} />
+                        {isStartingAll ? "Starting..." : "Start All Groups"}
+                    </button>
+                )}
             </div>
 
             {/* Stats section */}
@@ -153,7 +345,7 @@ export default function WaitlistPage() {
                             </div>
                         </div>
                     ) : (
-                        waitlist.map((group, index) => (
+                        waitlist.map((group: WaitlistGroup, index: number) => (
                             <div key={group.id} className="bg-bg-card border border-border p-3 sm:p-4 sm:rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4 group transition-all hover:border-zinc-700">
                                 <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 w-full md:w-auto">
                                     <div className="flex flex-col items-center justify-center min-w-14 sm:min-w-16">
@@ -191,7 +383,14 @@ export default function WaitlistPage() {
                                 </div>
 
                                 <div className="flex items-center gap-3 w-full md:w-auto mt-2 md:mt-0">
-                                    <button className="flex-1 cursor-pointer md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-2 bg-brand-secondary text-black rounded-lg font-bold hover:bg-brand-secondary/90 transition-all whitespace-nowrap text-sm sm:text-base">
+                                    <button
+                                        onClick={() => {
+                                            setSelectedGroup(group);
+                                            setIsModalOpen(true);
+                                        }}
+                                        disabled={group.totalPlayers === 0}
+                                        className="flex-1 cursor-pointer md:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 sm:py-2 bg-brand-secondary text-black rounded-lg font-bold hover:bg-brand-secondary/90 transition-all whitespace-nowrap text-sm sm:text-base disabled:opacity-30 disabled:cursor-not-allowed"
+                                    >
                                         <Play className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-black" strokeWidth={3} />
                                         Assign Studio
                                     </button>
@@ -217,6 +416,12 @@ export default function WaitlistPage() {
                     </p>
                 </div>
             </div>
+
+            <StudioAssignmentModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                group={selectedGroup}
+            />
         </div>
     );
 }

@@ -50,7 +50,21 @@ export const groupsApi = baseApi.injectEndpoints({
             }),
             providesTags: ["Groups"],
         }),
+        getGroups: builder.query<any, void>({
+            query: () => ({
+                url: "/admin/groups",
+                method: "GET",
+            }),
+            providesTags: ["Groups"],
+        }),
+        startAllWaitlist: builder.mutation<any, void>({
+            query: () => ({
+                url: "/admin/waitlist/start-all",
+                method: "POST",
+            }),
+            invalidatesTags: ["Groups"],
+        }),
     }),
 });
 
-export const { useCreateGroupMutation, useGetWaitlistQuery } = groupsApi;
+export const { useCreateGroupMutation, useGetWaitlistQuery, useGetGroupsQuery, useStartAllWaitlistMutation } = groupsApi;
