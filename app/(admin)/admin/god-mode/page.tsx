@@ -133,13 +133,13 @@ const SessionCard = ({ teamName, studio, players, timeRemaining, isPaused, group
                     <div className={cn(
                         "flex items-center gap-2 px-3 py-1.5 rounded-lg border transition-all",
                         isPaused
-                            ? "bg-zinc-900 border-zinc-800"
+                            ? "bg-amber-500/10 border-amber-500/20"
                             : "bg-[#ec2c8a]/10 border-[#ec2c8a]/20"
                     )}>
-                        <Clock size={14} className={isPaused ? "text-zinc-600" : "text-[#ec2c8a]"} />
+                        <Clock size={14} className={isPaused ? "text-amber-500" : "text-[#ec2c8a]"} />
                         <p className={cn(
                             "text-xl font-mono font-black",
-                            isPaused ? "text-zinc-500" : "text-white"
+                            isPaused ? "text-amber-500" : "text-white"
                         )}>{timeRemaining}</p>
                     </div>
                 </div>
@@ -191,12 +191,6 @@ const SessionCard = ({ teamName, studio, players, timeRemaining, isPaused, group
     );
 };
 
-const studioOptions = [
-    { value: "studio1", label: "Studio 1" },
-    { value: "studio2", label: "Studio 2" },
-    { value: "studio3", label: "Studio 3" },
-    { value: "studio4", label: "Studio 4" },
-];
 
 export default function GodModePage() {
     const { data: godModeData, isLoading: isGodModeLoading, isError: isGodModeError, refetch: refetchGodMode } = useGetGodModeSessionsQuery(undefined, {
@@ -258,10 +252,17 @@ export default function GodModePage() {
         }
     };
 
-    const calculateTimeRemaining = (startTime: string, durationMin: number) => {
+    const calculateTimeRemaining = (startTime: string, durationMin: number, isPaused: boolean, pausedAt: string | null) => {
         const start = parseISO(startTime);
         const end = new Date(start.getTime() + durationMin * 60000);
-        const diff = differenceInSeconds(end, now);
+        
+        let diff;
+        if (isPaused && pausedAt) {
+            const paused = parseISO(pausedAt);
+            diff = differenceInSeconds(end, paused);
+        } else {
+            diff = differenceInSeconds(end, now);
+        }
 
         if (diff <= 0) return "00:00";
 
@@ -360,7 +361,7 @@ export default function GodModePage() {
                                 isPaused={group.isPaused || false}
                                 onTogglePause={handleTogglePause}
                                 onForceEnd={handleForceEnd}
-                                timeRemaining={mainSession ? calculateTimeRemaining(mainSession.startTime, mainSession.durationMin) : "--:--"}
+                                timeRemaining={mainSession ? calculateTimeRemaining(mainSession.startTime, mainSession.durationMin, mainSession.isPaused, mainSession.pausedAt) : "--:--"}
                             />
                         ))
                     ) : (

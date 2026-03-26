@@ -46,7 +46,6 @@ const timerSlice = createSlice({
     startTimer: (state, action: PayloadAction<number>) => {
       const startTime = Date.now();
       const duration = action.payload * 60; // convert min to sec
-
       state.startTime = startTime;
       state.duration = duration;
       state.isActive = true;
@@ -64,8 +63,17 @@ const timerSlice = createSlice({
         localStorage.removeItem("sessionTimer_duration");
       }
     },
+    syncTimer: (state, action: PayloadAction<{ startTime: number; duration: number }>) => {
+      state.startTime = action.payload.startTime;
+      state.duration = action.payload.duration;
+      state.isActive = true;
+      if (typeof window !== "undefined") {
+        localStorage.setItem("sessionTimer_startTime", action.payload.startTime.toString());
+        localStorage.setItem("sessionTimer_duration", action.payload.duration.toString());
+      }
+    },
   },
 });
 
-export const { startTimer, clearTimer } = timerSlice.actions;
+export const { startTimer, clearTimer, syncTimer } = timerSlice.actions;
 export default timerSlice.reducer;

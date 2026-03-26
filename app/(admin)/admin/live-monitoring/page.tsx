@@ -12,7 +12,10 @@ import {
     CheckCircle2,
     X
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { syncTimer } from "@/redux/features/timerSlice";
+import { RootState } from "@/redux/store/store";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useCreateGroupMutation } from "@/redux/api/admin/groupsApi";
@@ -56,6 +59,8 @@ const StudioSkeleton = () => (
 );
 
 export default function LiveMonitoringPage() {
+    const dispatch = useDispatch();
+    const timerState = useSelector((state: RootState) => state.timer);
     const { formattedTime } = useTimer();
     const [isCreateGroupModalOpen, setIsCreateGroupModalOpen] = useState(false);
     const [groupName, setGroupName] = useState("");
@@ -138,6 +143,18 @@ export default function LiveMonitoringPage() {
     };
 
     const studios = studiosData?.data || [];
+
+    // Sync timer from server if not active and we have occupied studios
+    useEffect(() => {
+        if (!timerState.isActive) {
+            const occupiedStudio = studios.find(s => s.status === "OCCUPIED" && s.assignments?.[0]?.createdAt);
+            if (occupiedStudio) {
+                const startTime = new Date(occupiedStudio.assignments[0].createdAt).getTime();
+                const duration = 12 * 60; // 12 minutes standard
+                dispatch(syncTimer({ startTime, duration }));
+            }
+        }
+    }, [studios, timerState.isActive, dispatch]);
 
     return (
         <div className="space-y-8 max-w-8xl mx-auto">

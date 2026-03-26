@@ -13,11 +13,18 @@ interface EnterScoresResponse {
   data: any;
 }
 
+interface EditScoreRequest {
+  gameResultId: string;
+  subTeamName: string;
+  newScore: number;
+  reason: string;
+}
+
 export const scoresApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     enterScores: builder.mutation<EnterScoresResponse, EnterScoresRequest>({
       query: (body) => ({
-        url: "/admin/scores",
+        url: "/players/scores",
         method: "POST",
         body,
       }),
@@ -30,7 +37,15 @@ export const scoresApi = baseApi.injectEndpoints({
       }),
       providesTags: ["Scores"],
     }),
+    editScore: builder.mutation<any, EditScoreRequest>({
+      query: (body) => ({
+        url: "/admin/scores/edit",
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["Scores"],
+    }),
   }),
 });
 
-export const { useEnterScoresMutation, useGetScoresQuery } = scoresApi;
+export const { useEnterScoresMutation, useGetScoresQuery, useEditScoreMutation } = scoresApi;

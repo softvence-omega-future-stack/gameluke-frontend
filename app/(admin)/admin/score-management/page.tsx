@@ -16,7 +16,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useGetScoresQuery } from "@/redux/api/admin/scoresApi";
+import { useGetScoresQuery, useEditScoreMutation } from "@/redux/api/admin/scoresApi";
 import { useGetTeamsQuery } from "@/redux/api/player/playerApi";
 import { useEnterScoresMutation } from "@/redux/api/admin/scoresApi";
 import { toast } from "sonner";
@@ -131,26 +131,25 @@ function ScoreDetailsModal({ score, onClose, onSave }: ScoreDetailsModalProps) {
   const [editableScores, setEditableScores] = useState<Record<string, number>>({});
   const adminId = useSelector((state: RootState) => state.auth.user?.id);
 
-  const { data: teamsData, isLoading, isError, refetch } = useGetTeamsQuery(score?.id || "", {
-    skip: !score?.id,
+  const { data: teamsData, isLoading, isError, refetch } = useGetTeamsQuery(score?.groupId || "", {
+    skip: !score?.groupId,
   });
 
-  const [enterScores, { isLoading: isSaving }] = useEnterScoresMutation();
+  const [enterScores, { isLoading: isSavingBatch }] = useEnterScoresMutation();
+  const [editScore, { isLoading: isEditing }] = useEditScoreMutation();
+  const isSaving = isSavingBatch || isEditing;
 
   useEffect(() => {
-    if (teamsData?.data?.[0]?.subTeams) {
-      const initialScores: Record<string, number> = {};
-      teamsData.data[0].subTeams.forEach((team: any) => {
-        initialScores[team.name] = team.score;
-      });
-      setEditableScores(initialScores);
+    if (score?.subTeamScores) {
+      setEditableScores(score.subTeamScores);
     }
-  }, [teamsData]);
+  }, [score]);
 
   if (!score) return null;
 
-  const assignment = teamsData?.data?.[0];
-  const subTeams = assignment?.subTeams || [];
+  const group = score.group;
+  const assignment = score.studioAssignment;
+  const subTeams = teamsData?.data?.[0]?.subTeams || [];
   const studio = assignment?.studio;
 
   const handleScoreChange = (teamName: string, newVal: string) => {
@@ -161,15 +160,30 @@ function ScoreDetailsModal({ score, onClose, onSave }: ScoreDetailsModalProps) {
   };
 
   const handleFinalSave = async (reason: string) => {
-    if (!assignment?.id) return;
-    
+    if (!score?.id) return;
+
+    const modifiedTeams = Object.entries(editableScores).filter(([name, val]) => {
+      const originalVal = score.subTeamScores[name];
+      return originalVal !== val;
+    });
+
+    if (modifiedTeams.length === 0) {
+      setIsConfirming(false);
+      return;
+    }
+
     try {
-      await enterScores({
-        assignmentId: assignment.id,
-        scores: editableScores,
-        playerId: adminId || "admin"
-      }).unwrap();
-      
+      await Promise.all(
+        modifiedTeams.map(([teamName, newVal]) =>
+          editScore({
+            gameResultId: score.id,
+            subTeamName: teamName,
+            newScore: newVal,
+            reason: reason,
+          }).unwrap()
+        )
+      );
+
       toast.success("Scores updated successfully!");
       if (onSave) onSave([], reason);
       onClose();
@@ -202,10 +216,10 @@ function ScoreDetailsModal({ score, onClose, onSave }: ScoreDetailsModalProps) {
             <ModalSkeleton />
           ) : isError ? (
             <div className="flex-1 flex flex-col items-center justify-center p-8 space-y-4">
-               <AlertCircle className="w-16 h-16 text-red-500 opacity-50" />
-               <h3 className="text-xl font-bold text-white">Data Fetch Error</h3>
-               <p className="text-zinc-500 text-center">Unable to load team details for this group.</p>
-               <button onClick={() => refetch()} className="px-6 py-2 bg-zinc-800 rounded-xl font-bold uppercase hover:bg-zinc-700">Retry</button>
+              <AlertCircle className="w-16 h-16 text-red-500 opacity-50" />
+              <h3 className="text-xl font-bold text-white">Data Fetch Error</h3>
+              <p className="text-zinc-500 text-center">Unable to load team details for this group.</p>
+              <button onClick={() => refetch()} className="px-6 py-2 bg-zinc-800 rounded-xl font-bold uppercase hover:bg-zinc-700">Retry</button>
             </div>
           ) : (
             <>
@@ -221,13 +235,13 @@ function ScoreDetailsModal({ score, onClose, onSave }: ScoreDetailsModalProps) {
                           Session Finished
                         </p>
                         <h4 className="text-white text-2xl font-black">
-                          {score.time || "00:00"}
+                          {score.createdAt ? format(new Date(score.createdAt), "HH:mm") : "00:00"}
                         </h4>
                       </div>
                     </div>
 
                     <h3 className="text-brand-secondary text-xl sm:text-2xl font-black uppercase tracking-tighter text-center italic">
-                      {studio?.gameName || "Game Result"}
+                      {studio?.gameName || score.games || "Game Result"}
                     </h3>
 
                     <div className="text-center sm:text-right">
@@ -249,7 +263,7 @@ function ScoreDetailsModal({ score, onClose, onSave }: ScoreDetailsModalProps) {
                     Performed by
                   </p>
                   <h4 className="text-brand-secondary text-xl font-bold uppercase tracking-wide">
-                    {score.name} (PIN: {score.pin})
+                    {group?.name} (PIN: {group?.pin})
                   </h4>
                 </div>
               </div>
@@ -280,14 +294,19 @@ function ScoreDetailsModal({ score, onClose, onSave }: ScoreDetailsModalProps) {
                             <p className="text-zinc-500 text-[10px] font-bold uppercase tracking-widest mb-1">
                               Score
                             </p>
-                            <input
-                              type="number"
-                              value={editableScores[team.name] ?? team.score}
-                              onChange={(e) =>
-                                handleScoreChange(team.name, e.target.value)
-                              }
-                              className="w-20 sm:w-24 bg-bg-deep border-border py-2 px-3 text-white text-xl sm:text-2xl font-black text-center focus:outline-none focus:border-brand-secondary transition-all"
-                            />
+                             <select
+                                value={editableScores[team.name] ?? team.score}
+                                onChange={(e) =>
+                                  handleScoreChange(team.name, e.target.value)
+                                }
+                                className="w-24 sm:w-28 bg-bg-deep border-border py-2 px-3 text-white text-lg sm:text-xl font-black rounded-lg focus:outline-none focus:border-brand-secondary transition-all cursor-pointer appearance-none"
+                              >
+                                {[100, 200, 300].map(val => (
+                                  <option key={val} value={val} className="bg-bg-deep text-white">
+                                    {val}
+                                  </option>
+                                ))}
+                              </select>
                           </div>
                         </div>
                       </div>
@@ -464,13 +483,7 @@ export default function ScoreManagementPage() {
               return (
                 <div
                   key={score.id}
-                  onClick={() => setSelectedScore({
-                    ...group,
-                    name: group.name,
-                    studio: studioName,
-                    games: assignment?.studio?.gameName || "Basketball",
-                    time: format(new Date(score.createdAt), "HH:mm"),
-                  })}
+                  onClick={() => setSelectedScore(score)}
                   className="bg-bg-card cursor-pointer border-border p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group transition-all duration-300 hover:border-brand-secondary/30"
                 >
                   <div className="space-y-2 w-full sm:w-auto">

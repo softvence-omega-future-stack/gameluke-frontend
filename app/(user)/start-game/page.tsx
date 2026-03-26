@@ -6,8 +6,9 @@ import { useState, useEffect, useMemo } from "react";
 import { Clock, Trophy, Users, Shield, Loader2, AlertTriangle, AlertCircle } from "lucide-react";
 import { useGetTeamsQuery } from "@/redux/api/player/playerApi";
 import { useDispatch, useSelector } from "react-redux";
-import { startTimer } from "@/redux/features/timerSlice";
+import { startTimer, syncTimer } from "@/redux/features/timerSlice";
 import { RootState, AppDispatch } from "@/redux/store/store";
+import { useTimer } from "@/hooks/useTimer";
 import { cn } from "@/lib/utils";
 
 const StartGameSkeleton = () => (
@@ -38,7 +39,7 @@ const StartGameSkeleton = () => (
 export default function StartGamePage() {
     const router = useRouter();
     const dispatch = useDispatch<AppDispatch>();
-    const [timeLeft, setTimeLeft] = useState<number>(12 * 60);
+    const { timeLeft, formattedTime } = useTimer();
     const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
     const [groupId, setGroupId] = useState<string | null>(null);
 
@@ -53,51 +54,27 @@ export default function StartGamePage() {
         }
     }, [router]);
 
-    // Auto-start timer if not active when entering the page
-    useEffect(() => {
-        if (!timerState.isActive) {
-            dispatch(startTimer(12)); // Start with 12 minutes default
-        }
-    }, [timerState.isActive, dispatch]);
-
     const { data: teamsData, isLoading, isError, refetch } = useGetTeamsQuery(groupId || "", {
         skip: !groupId,
     });
 
+    // Sync timer from server if not active
+    useEffect(() => {
+        if (teamsData?.data?.[0]?.createdAt && !timerState.isActive) {
+            const startTime = new Date(teamsData.data[0].createdAt).getTime();
+            const duration = 12 * 60; // 12 minutes standard duration
+            dispatch(syncTimer({ startTime, duration }));
+        }
+    }, [teamsData, timerState.isActive, dispatch]);
+
     const sessionDuration = timerState.duration || 12 * 60;
 
     useEffect(() => {
-        if (!timerState.startTime) {
-            return;
+        if (timeLeft <= 0 && timerState.isActive) {
+            router.push("/end-game");
         }
+    }, [timeLeft, timerState.isActive, router]);
 
-        const calculateTimeLeft = () => {
-            const now = Date.now();
-            const elapsed = Math.floor((now - timerState.startTime!) / 1000);
-            const remaining = Math.max(0, timerState.duration - elapsed);
-            return remaining;
-        };
-
-        // Update immediately
-        setTimeLeft(calculateTimeLeft());
-
-        const timer = setInterval(() => {
-            const remaining = calculateTimeLeft();
-            setTimeLeft(remaining);
-            if (remaining <= 0) {
-                clearInterval(timer);
-                router.push("/end-game");
-            }
-        }, 1000);
-
-        return () => clearInterval(timer);
-    }, [timerState.startTime, timerState.duration, router]);
-
-    const formatTime = (seconds: number) => {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-    };
 
     if (isLoading || !groupId) return <StartGameSkeleton />;
 
@@ -131,9 +108,9 @@ export default function StartGamePage() {
         );
     }
 
-    const teamAssignments = teamsData?.data?.[0];
-    const studio = teamAssignments?.studio;
-    const subTeams = teamAssignments?.subTeams || [];
+    const teamAssignment = teamsData?.data?.[0];
+    const studio = teamAssignment?.studio;
+    const subTeams = teamAssignment?.subTeams || [];
 
     // Derive "Playing as" team - for now let's show the first team or find based on current user if possible
     // Given the prompt, showing the context of the group's assigned teams
@@ -182,7 +159,7 @@ export default function StartGamePage() {
                                     "text-2xl font-black transition-colors",
                                     timeLeft < 10 * 60 ? "text-red-500" : "text-white"
                                 )}>
-                                    {formatTime(timeLeft)}
+                                    {formattedTime}
                                 </span>
                             </div>
                         </div>
@@ -293,7 +270,7 @@ export default function StartGamePage() {
                                 <section className="space-y-2">
                                     <h3 className="text-gray-400 font-bold">1. Players</h3>
                                     <ul className="list-disc pl-5 space-y-1 text-sm">
-                                        <li>{teamAssignments?.config?.teamSetup || "Standard"} match formation</li>
+                                        <li>{teamAssignment?.config?.teamSetup || "Standard"} match formation</li>
                                         <li>All players must be at their positions</li>
                                     </ul>
                                 </section>
