@@ -119,7 +119,7 @@ export const playerApi = baseApi.injectEndpoints({
         }),
         joinGroup: builder.mutation<any, { pin: string; email: string }>({
             query: (body) => ({
-                url: "/players/join",
+                url: "/players/groups/join",
                 method: "POST",
                 body,
             }),
@@ -139,6 +139,14 @@ export const playerApi = baseApi.injectEndpoints({
             }),
             providesTags: (result, error, groupId) => [{ type: "Groups", id: groupId }],
         }),
+        confirmTeams: builder.mutation<any, { groupId: string; teams: { teamId: string; playerIds: string[] }[] }>({
+            query: (body) => ({
+                url: "/players/confirm-teams",
+                method: "POST",
+                body,
+            }),
+            invalidatesTags: (result, error, { groupId }) => [{ type: "Groups", id: groupId }],
+        }),
     }),
 });
 
@@ -149,4 +157,5 @@ export const {
     useJoinGroupMutation,
     useGetStudioDetailsQuery,
     useGetTeamsQuery,
+    useConfirmTeamsMutation,
 } = playerApi;

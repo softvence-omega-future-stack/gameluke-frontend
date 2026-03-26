@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Users, AlertTriangle, RefreshCcw } from "lucide-react";
 import { useParams } from "next/navigation";
-import { useGetGroupDetailsQuery } from "@/redux/api/player/playerApi";
+import { useGetGroupDetailsQuery, useGetTeamsQuery } from "@/redux/api/player/playerApi";
 
 const GroupDetailsSkeleton = () => (
     <div className="relative z-10 w-full max-w-xl mx-auto bg-[#111116]/95 border border-white/5 p-6 md:p-8 shadow-2xl backdrop-blur-md rounded-3xl animate-pulse">
@@ -27,19 +27,29 @@ const GroupDetailsSkeleton = () => (
     </div>
 );
 
-interface GroupPlayer {
-    id: string;
-    name: string;
-    email: string;
-}
 
 export default function GroupDetailsPage() {
     const router = useRouter();
     const params = useParams();
     const slug = params.slug as string;
-    const { data: groupData, isLoading, isError, refetch } = useGetGroupDetailsQuery(slug);
+
+    const { data: groupData, isLoading: isGroupLoading, isError: isGroupError, refetch } = useGetGroupDetailsQuery(slug);
+    const { data: teamsData, isLoading: isTeamsLoading } = useGetTeamsQuery(slug);
+    
+    const isLoading = isGroupLoading || isTeamsLoading;
+    const isError = isGroupError; // Primary error source
 
     const group = groupData?.data;
+    const teamAssignment = teamsData?.data?.[0];
+    
+    // Players: Preferred from teams (organized) or fallback to group members (flat list)
+    const subTeams = teamAssignment?.subTeams || [];
+    const teamPlayers = subTeams.flatMap(st => st.players.map(p => p.player));
+    const players = teamPlayers.length > 0 ? teamPlayers : (group?.players || []);
+    
+    const groupName = group?.name || (teamAssignment as any)?.group?.name || teamAssignment?.studio?.name || "Group Details";
+    const totalPlayers = players.length;
+    const maxPlayers = group?.maxPlayers || teamAssignment?.config?.studioSize || 12;
 
     return (
         <div className="relative min-h-screen flex items-center justify-center bg-black font-sans text-white p-4 overflow-hidden">
@@ -69,7 +79,7 @@ export default function GroupDetailsPage() {
                         </button>
                     </div>
                 </div>
-            ) : !group ? (
+            ) : !group && !teamAssignment ? (
                 <div className="relative z-10 w-full max-w-xl mx-auto bg-[#111116]/95 border border-white/5 p-10 rounded-3xl shadow-2xl backdrop-blur-md flex flex-col items-center text-center">
                     <Users className="text-gray-500 w-16 h-16 mb-6 opacity-20" />
                     <h2 className="text-xl font-bold mb-2">Group Not Found</h2>
@@ -85,25 +95,24 @@ export default function GroupDetailsPage() {
                         </div>
                         <div>
                             <h1 className="text-[#FFFF00] text-2xl font-black uppercase tracking-tight leading-tight drop-shadow-sm">
-                                {group.name}
+                                {groupName}
                             </h1>
                             <div className="flex items-center gap-2 mt-1">
                                 <span className="flex items-center gap-1.5 text-[#00E676] text-xs font-bold uppercase tracking-wider">
                                     <div className="w-1.5 h-1.5 rounded-full bg-[#00E676] animate-pulse" />
-                                    {group.totalPlayers} Players In Group
+                                    {totalPlayers} Players In Group
                                 </span>
                                 <span className="text-gray-700">•</span>
-                                <span className="text-gray-500 text-xs font-bold">{group.maxPlayers - group.totalPlayers} Slots Left</span>
+                                <span className="text-gray-500 text-xs font-bold">{maxPlayers - totalPlayers} Slots Left</span>
                             </div>
                         </div>
                     </div>
 
                     {/* Members Header */}
                     <h3 className="text-white/40 text-[10px] uppercase font-black tracking-widest mb-4 ml-1">Current Members</h3>
-
                     {/* Player Grid */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10 max-h-[40vh] overflow-y-auto pr-2 scrollbar-hide">
-                        {group.players.map((player: GroupPlayer) => (
+                        {players.map((player: any) => (
                             <div
                                 key={player.id}
                                 className="bg-[#1A1A23] border border-white/5 p-4 flex items-center gap-4 rounded-2xl hover:border-white/10 transition-all group"
@@ -122,7 +131,7 @@ export default function GroupDetailsPage() {
                             </div>
                         ))}
                     </div>
-
+ 
                     {/* Action Buttons */}
                     <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-white/5">
                         <button
@@ -132,12 +141,13 @@ export default function GroupDetailsPage() {
                             Back
                         </button>
                         <button
-                            onClick={() => router.push(`/pin-verification/${group.id}`)}
+                            onClick={() => router.push(teamAssignment ? "/confirm-team" : `/pin-verification/${slug}`)}
                             className="flex-1 bg-[#FFFF00] text-black font-black text-sm py-4 rounded-2xl hover:bg-yellow-400 transition-all active:scale-[0.98] shadow-xl shadow-yellow-400/10 cursor-pointer uppercase tracking-widest"
                         >
-                            Join Group
+                            {teamAssignment ? "Review Teams" : "Refresh / Join"}
                         </button>
                     </div>
+
                 </div>
             )}
         </div>
