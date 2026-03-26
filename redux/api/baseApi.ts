@@ -1,12 +1,15 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { RootState } from "../store/store";
+import Cookies from "js-cookie";
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: process.env.NEXT_PUBLIC_BASE_URL,
+  // baseUrl: "https://4lbnzk45-5000.asse.devtunnels.ms/api/v1",
+  baseUrl: "https://gameshow-development.vercel.app/api/v1",
+  // baseUrl: process.env.NEXT_PUBLIC_BASE_URL,
   prepareHeaders: (headers, { getState }) => {
-    const token = (getState() as RootState).auth.accessToken;
+    const token = (getState() as RootState).auth.accessToken || Cookies.get("accessToken");
     if (token) {
-      headers.set("authorization", `Bearer ${token}`);
+      headers.set("Authorization", `Bearer ${token}`);
     }
     return headers;
   },
@@ -15,6 +18,6 @@ const baseQuery = fetchBaseQuery({
 export const baseApi = createApi({
   reducerPath: "api",
   baseQuery,
-  tagTypes: ["AdminAuth"],
+  tagTypes: ["AdminAuth", "Studios", "Dashboard", "Groups", "Scores"],
   endpoints: () => ({}),
 });

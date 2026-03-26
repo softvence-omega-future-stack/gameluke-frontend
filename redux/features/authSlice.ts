@@ -1,4 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import Cookies from "js-cookie";
 
 interface User {
   id: string;
@@ -16,10 +17,10 @@ interface AuthState {
 }
 
 const initialState: AuthState = {
-  accessToken: null,
-  refreshToken: null,
+  accessToken: Cookies.get("accessToken") || null,
+  refreshToken: Cookies.get("refreshToken") || null,
   user: null,
-  isAuthenticated: false,
+  isAuthenticated: !!Cookies.get("accessToken"),
 };
 
 const authSlice = createSlice({
