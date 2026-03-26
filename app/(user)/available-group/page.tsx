@@ -70,7 +70,7 @@ export default function AvailableGroupPage() {
                             Available Groups {!isLoading && !isError && `(${groups.length})`}
                         </h2>
                         {isError && (
-                            <button 
+                            <button
                                 onClick={() => refetch()}
                                 className="text-[#FFFF00] text-[11px] font-bold flex items-center gap-1 hover:opacity-80 transition-opacity"
                             >
@@ -107,7 +107,7 @@ export default function AvailableGroupPage() {
                                 return (
                                     <div
                                         key={group.id}
-                                        onClick={() => router.push(`/group-details/${group.id}`)}
+                                        onClick={() => router.push(`/pin-verification/${group.id}`)}
                                         className="group cursor-pointer bg-[#121216]/90 border border-white/5 p-4 sm:p-5 flex items-center justify-between transition-all hover:bg-[#1A1A1F] hover:border-white/10 active:scale-[0.98] backdrop-blur-sm rounded-xl"
                                     >
                                         <div className="flex flex-col gap-1">

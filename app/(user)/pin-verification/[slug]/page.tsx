@@ -37,7 +37,7 @@ export default function PinVerificationPage() {
             if (response.success) {
                 // Success! Store group ID and redirect to confirm-team
                 localStorage.setItem("joinedGroupId", slug);
-                router.push("/confirm-team");
+                router.push(`/group-details/${slug}`);
             }
         } catch (err: any) {
             setError(err?.data?.message || "Invalid PIN. Please check and try again.");
