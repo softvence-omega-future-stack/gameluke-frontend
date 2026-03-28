@@ -3,9 +3,10 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
-import { Shield, Shuffle, Check, AlertTriangle, Loader2 } from "lucide-react";
+import { Shield, Shuffle, Check, AlertTriangle, Loader2, Users } from "lucide-react";
 import { useGetTeamsQuery, useConfirmTeamsMutation } from "@/redux/api/player/playerApi";
 import { toast } from "sonner";
+import socketService from "@/lib/socket";
 
 interface Player {
     id: string;
@@ -106,9 +107,31 @@ export default function ConfirmTeamPage() {
         }
     }, [teamsData]);
 
+    // Socket integration for real-time player updates
+    useEffect(() => {
+        if (!groupId) return;
+
+        const socket = socketService.getSocket();
+
+        // Join group room
+        socket.emit('join-group', { groupId });
+
+        // Listen for new players
+        socket.on('join-group', () => {
+            console.log("Player joined on ConfirmTeamPage, refetching teams...");
+            refetch();
+        });
+
+        return () => {
+            socket.off('player-joined');
+        };
+    }, [groupId, refetch]);
+
     const configuration = (teamsData?.data?.[0] as any)?.config?.teamSetup || teams.map(t => t.players.length).join("v");
 
     const totalPlayers = teams.reduce((acc, t) => acc + t.players.length, 0);
+    const maxPlayers = (teamsData?.data?.[0] as any)?.config?.studioSize || 12;
+    const isFull = totalPlayers === maxPlayers;
 
     const handleShuffle = () => {
         const allPlayers = teams.flatMap(t => t.players);
@@ -166,7 +189,7 @@ export default function ConfirmTeamPage() {
 
     const handleConfirm = async () => {
         if (!groupId) return;
-        
+
         if (totalPlayers < 2) {
             toast.error("Minimum 2 players required to confirm teams", {
                 description: "Add more players or join an existing group with more members.",
@@ -348,15 +371,22 @@ export default function ConfirmTeamPage() {
                     </button>
                     <button
                         onClick={handleConfirm}
-                        disabled={isConfirming}
-                        className="flex-1 bg-[#FFFF00] text-black font-black text-sm py-3 rounded-[14px] hover:bg-yellow-400 transition-all active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled={isConfirming || !isFull}
+                        className="flex-1 bg-[#FFFF00] text-black font-black text-sm py-4 rounded-[14px] hover:bg-yellow-400 transition-all active:scale-[0.98] shadow-lg flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {isConfirming ? (
                             <Loader2 className="w-4 h-4 animate-spin" strokeWidth={4} />
+                        ) : !isFull ? (
+                            <div className="flex items-center gap-2">
+                                <Users className="w-4 h-4 opacity-50" />
+                                <span className="opacity-50">Waiting for players ({totalPlayers}/{maxPlayers})</span>
+                            </div>
                         ) : (
-                            <Check className="w-4 h-4" strokeWidth={4} />
+                            <>
+                                <Check className="w-4 h-4" strokeWidth={4} />
+                                Confirm Teams
+                            </>
                         )}
-                        {isConfirming ? "Confirming..." : "Confirm"}
                     </button>
                 </div>
 

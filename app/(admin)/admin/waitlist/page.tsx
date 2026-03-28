@@ -21,8 +21,8 @@ import { useGetWaitlistQuery, WaitlistGroup, useStartAllWaitlistMutation } from 
 import { useGetStudiosQuery, Studio } from "@/redux/api/admin/studiosApi";
 import { useAssignGroupMutation } from "@/redux/api/admin/godModeApi";
 import { useState } from "react";
-import { useDispatch } from "react-redux";
-import { startTimer } from "@/redux/features/timerSlice";
+import socketService from "@/lib/socket";
+import { toast } from "sonner";
 
 const WaitlistSkeleton = () => (
     <div className="space-y-4">
@@ -213,7 +213,6 @@ const StudioAssignmentModal = ({ isOpen, onClose, group }: StudioAssignmentModal
 };
 
 export default function WaitlistPage() {
-    const dispatch = useDispatch();
     const { data: waitlistData, isLoading, isError, refetch } = useGetWaitlistQuery();
     const [startAll, { isLoading: isStartingAll }] = useStartAllWaitlistMutation();
     const [selectedGroup, setSelectedGroup] = useState<WaitlistGroup | null>(null);
@@ -224,9 +223,30 @@ export default function WaitlistPage() {
     const handleStartAll = async () => {
         try {
             await startAll().unwrap();
-            dispatch(startTimer(12));
-        } catch (err) {
+
+            // Signal server to start global countdown for each group
+            const socket = socketService.getSocket();
+            waitlist.forEach((group: WaitlistGroup) => {
+                socket.emit("start-game", { groupId: group.id });
+            });
+
+
+            toast.success("All groups started!", {
+                style: {
+                    background: "#111116",
+                    border: "1px solid #00E67630",
+                    color: "#00E676"
+                }
+            });
+        } catch (err: any) {
             console.error("Failed to start all:", err);
+            toast.error(err?.data?.message || "Failed to start groups", {
+                style: {
+                    background: "#111116",
+                    border: "1px solid #E91E6330",
+                    color: "#E91E63"
+                }
+            });
         }
     };
 

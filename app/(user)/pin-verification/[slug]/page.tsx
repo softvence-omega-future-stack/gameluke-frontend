@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { Lock, AlertTriangle, ArrowRight, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useJoinGroupMutation, useGetGroupDetailsQuery } from "@/redux/api/player/playerApi";
+import socketService from "@/lib/socket";
 
 export default function PinVerificationPage() {
     const router = useRouter();
@@ -35,6 +36,10 @@ export default function PinVerificationPage() {
         try {
             const response = await joinGroup({ pin, email }).unwrap();
             if (response.success) {
+                // Emit socket event for joining the group
+                const socket = socketService.getSocket();
+                socket.emit('join-group', { groupId: slug });
+
                 // Success! Store group ID and redirect to confirm-team
                 localStorage.setItem("joinedGroupId", slug);
                 router.push(`/group-details/${slug}`);

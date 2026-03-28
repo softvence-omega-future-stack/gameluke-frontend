@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import socketService from "@/lib/socket";
 
 const MapSkeleton = () => (
     <div className="relative min-h-screen bg-black text-white p-4 py-12 md:p-8 flex items-center justify-center overflow-x-hidden">
@@ -54,10 +55,49 @@ export default function ArenaMapPage() {
     // In a real scenario, the studioId would come from groupData.
     // For now, if not in groupData, we fallback to 1 as per user's example.
     const studioId = groupData?.data?.studioAssignments?.[0]?.studioId || 1;
+    console.log("studio id" + studioId)
 
     const { data: studioData, isLoading: isStudioLoading, isError: isStudioError, refetch } = useGetStudioDetailsQuery(studioId, {
         skip: !groupData?.success
     });
+
+    // API Fallback: If studio status changes to OCCUPIED, redirect immediately 
+    // This handles cases where the user joins late or misses the initial socket signal.
+    useEffect(() => {
+        if (studioData?.data?.status === "OCCUPIED") {
+            console.log("API: Studio is occupied, redirecting to game start...");
+            router.push("/start-game");
+        }
+    }, [studioData, router]);
+
+    // Socket integration for game start synchronization
+    useEffect(() => {
+        if (!groupId) return;
+
+        const socket = socketService.getSocket();
+
+        // Join the group room
+        socket.emit('join-group', { groupId });
+
+        // Listen for the start signal
+        const handleStart = () => {
+            console.log("Socket: Countdown signal received, redirecting...");
+            router.push("/start-game");
+        };
+
+        socket.on('countdown', handleStart);
+        socket.on('game-status', (data: any) => {
+            console.log("Socket: game-status updated", data);
+            if (data?.status === "IN_PROGRESS" || data?.status === "START_GAME" || data?.status === "OCCUPIED") {
+                handleStart();
+            }
+        });
+
+        return () => {
+            socket.off('countdown', handleStart);
+            socket.off('game-status');
+        };
+    }, [groupId, router]);
 
     if (isGroupLoading || isStudioLoading || !groupId) return <MapSkeleton />;
 
@@ -70,7 +110,7 @@ export default function ArenaMapPage() {
                         alt="Arcade Background"
                         fill
                         style={{ objectFit: 'cover' }}
-                        className="brightness-[0.2] blur-[8px]"
+                        className="brightness-[0.2] blur-sm"
                     />
                 </div>
                 <div className="relative z-10 w-full max-w-sm bg-[#111116]/90 border border-red-900/30 p-8 rounded-3xl text-center backdrop-blur-md">
@@ -200,13 +240,18 @@ export default function ArenaMapPage() {
                     </div>
                 </div>
 
-                {/* Final Action */}
-                <button
-                    onClick={() => router.push("/start-game")}
-                    className="w-full bg-[#FFFF00] text-black font-black text-sm py-4 rounded-2xl hover:bg-yellow-400 transition-all active:scale-[0.98] shadow-2xl shadow-yellow-400/20 cursor-pointer mt-2 uppercase tracking-widest"
-                >
-                    I&apos;m at the Studio - Start Game!
-                </button>
+                {/* Final Action - Auto-sync Status */}
+                <div className="w-full bg-[#1A1A23]/80 border border-brand-secondary/20 p-6 rounded-2xl flex flex-col items-center gap-4 backdrop-blur-md shadow-[0_0_20px_rgba(0,230,118,0.05)]">
+                    <div className="flex items-center gap-3">
+                        <Loader2 className="w-5 h-5 text-brand-secondary animate-spin" />
+                        <span className="text-white text-sm font-bold uppercase tracking-widest">
+                            Waiting for arena activation...
+                        </span>
+                    </div>
+                    <p className="text-zinc-500 text-[10px] font-medium text-center uppercase tracking-tighter">
+                        The session will begin automatically once the administrator initiates the countdown.
+                    </p>
+                </div>
             </div>
         </div>
     );
