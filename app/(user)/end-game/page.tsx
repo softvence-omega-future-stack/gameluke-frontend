@@ -5,9 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Clock, Trophy, Shield, Loader2, AlertTriangle, PartyPopper, CheckCircle } from "lucide-react";
 import { useGetTeamsQuery } from "@/redux/api/player/playerApi";
-import { useDispatch } from "react-redux";
-import { clearTimer } from "@/redux/features/timerSlice";
-import { AppDispatch } from "@/redux/store/store";
+
 import { useEnterScoresMutation } from "@/redux/api/admin/scoresApi";
 import { toast } from "sonner";
 
@@ -37,7 +35,7 @@ const EndGameSkeleton = () => (
 
 export default function EndGamePage() {
     const router = useRouter();
-    const dispatch = useDispatch<AppDispatch>();
+
     const [groupId, setGroupId] = useState<string | null>(null);
     const [selectedScores, setSelectedScores] = useState<Record<string, number>>({});
     const [playerId, setPlayerId] = useState<string | null>(null);
@@ -56,9 +54,7 @@ export default function EndGamePage() {
     }, [router]);
 
     // Clear timer when reaching end game
-    useEffect(() => {
-        dispatch(clearTimer());
-    }, [dispatch]);
+
 
     const { data: teamsData, isLoading, isError, refetch } = useGetTeamsQuery(groupId || "", {
         skip: !groupId,

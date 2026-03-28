@@ -85,6 +85,15 @@ export interface TeamAssignment {
             };
         }[];
     }[];
+    group?: {
+        id: string;
+        name: string;
+        pin: string;
+        totalPlayers: number;
+        maxPlayers: number;
+        status: string;
+        childFriendly: boolean;
+    };
 }
 
 interface GetTeamsResponse {

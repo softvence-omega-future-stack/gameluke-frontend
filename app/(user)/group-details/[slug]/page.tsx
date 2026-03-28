@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Users, AlertTriangle, RefreshCcw } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useGetGroupDetailsQuery, useGetTeamsQuery } from "@/redux/api/player/playerApi";
+import socketService from "@/lib/socket";
+import { useEffect } from "react";
 
 const GroupDetailsSkeleton = () => (
     <div className="relative z-10 w-full max-w-xl mx-auto bg-[#111116]/95 border border-white/5 p-6 md:p-8 shadow-2xl backdrop-blur-md rounded-3xl animate-pulse">
@@ -35,18 +37,36 @@ export default function GroupDetailsPage() {
 
     const { data: groupData, isLoading: isGroupLoading, isError: isGroupError, refetch } = useGetGroupDetailsQuery(slug);
     const { data: teamsData, isLoading: isTeamsLoading } = useGetTeamsQuery(slug);
-    
+
+    useEffect(() => {
+        const socket = socketService.getSocket();
+
+        // Join the group room to receive real-time updates
+        socket.emit('join-group', { groupId: slug });
+
+        // Listen for new players joining
+        socket.on('player-joined', (data) => {
+            console.log("New player joined, refetching...", data);
+            refetch();
+        });
+
+        // Cleanup on unmount
+        return () => {
+            socket.off('player-joined');
+        };
+    }, [slug, refetch]);
+
     const isLoading = isGroupLoading || isTeamsLoading;
     const isError = isGroupError; // Primary error source
 
     const group = groupData?.data;
     const teamAssignment = teamsData?.data?.[0];
-    
+
     // Players: Preferred from teams (organized) or fallback to group members (flat list)
     const subTeams = teamAssignment?.subTeams || [];
     const teamPlayers = subTeams.flatMap(st => st.players.map(p => p.player));
     const players = teamPlayers.length > 0 ? teamPlayers : (group?.players || []);
-    
+
     const groupName = group?.name || (teamAssignment as any)?.group?.name || teamAssignment?.studio?.name || "Group Details";
     const totalPlayers = players.length;
     const maxPlayers = group?.maxPlayers || teamAssignment?.config?.studioSize || 12;
@@ -131,7 +151,7 @@ export default function GroupDetailsPage() {
                             </div>
                         ))}
                     </div>
- 
+
                     {/* Action Buttons */}
                     <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-white/5">
                         <button
@@ -141,10 +161,10 @@ export default function GroupDetailsPage() {
                             Back
                         </button>
                         <button
-                            onClick={() => router.push(teamAssignment ? "/confirm-team" : `/pin-verification/${slug}`)}
+                            onClick={() => router.push("/confirm-team")}
                             className="flex-1 bg-[#FFFF00] text-black font-black text-sm py-4 rounded-2xl hover:bg-yellow-400 transition-all active:scale-[0.98] shadow-xl shadow-yellow-400/10 cursor-pointer uppercase tracking-widest"
                         >
-                            {teamAssignment ? "Review Teams" : "Refresh / Join"}
+                            Confirm Teams
                         </button>
                     </div>
 
